@@ -1,5 +1,6 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchOperator
+from airflow.operators.python import PythonOperator, 
+from airflow.operators.branch_operator import BaseBranchOperator
 from airflow.operators.bash import BashOperator
 import datetime
 from datetime import datetime
@@ -37,7 +38,7 @@ with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule
         task_id = "get_webdriver_options_b",
         python_callable = _webdriver_options
     )
-    csss = BranchOperator(
+    csss = BaseBranchOperator(
 
         task_id = "csss",
         python_callable = _choose_webdriver_options
