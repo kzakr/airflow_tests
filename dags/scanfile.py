@@ -15,7 +15,7 @@ def _choose_webdriver_options(ti):
     return inacurate
 
 
-with DAG("scanfile",state_date = datetime(2021,1,1), schedule_interval = "@daily", catchup = False) as da
+with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as da
 
     get_webdriver_options = PythonOperator(
 
