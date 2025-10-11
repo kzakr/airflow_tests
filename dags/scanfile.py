@@ -3,7 +3,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.branch_operator import BaseBranchOperator
 from airflow.operators.bash import BashOperator
 import datetime
-from datetime import datetime
+
 
 
 def _webdriver_options():
