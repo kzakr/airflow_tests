@@ -51,4 +51,5 @@ with DAG("scanfile",state_date = datetime(2021,1,1), schedule_interval = "@daily
         bash_command = "echo 'inaccurate'"
     )
 
+    
     [get_webdriver_options, get_webdriver_options_a, get_webdriver_options_b]>>csss>>[accurate, inaccurate]
