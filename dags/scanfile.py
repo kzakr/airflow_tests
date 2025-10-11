@@ -37,7 +37,7 @@ with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule
         task_id = "get_webdriver_options_b",
         python_callable = _webdriver_options
     )
-    csss = BaseBranchOperator(
+    csss = BranchPythonOperator(
 
         task_id = "csss",
         python_callable = _choose_webdriver_options
