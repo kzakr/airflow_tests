@@ -1,0 +1,54 @@
+from airflow import DAG
+from airflow.operators.python import PythonOperator, BranchOperator
+from airflow.operators.bash import BashOperator
+from datetime import datetime
+
+def _webdriver_options():
+    return "hello world"
+
+def _choose_webdriver_options(ti):
+
+    reu = ti.xcom_pull(task_ids = [get_webdriver_options, get_webdriver_options_a, get_webdriver_options_b])
+    max(reu)
+    if (message == "hello world"):
+        return accurate
+    return inacurate
+
+
+with DAG("scanfile",state_date = datetime(2021,1,1), schedule_interval = "@daily", catchup = False) as da
+
+    get_webdriver_options = PythonOperator(
+
+        task_id = "get_webdriver_options",
+        python_callable = _webdriver_options
+    )
+    
+    get_webdriver_options_a = PythonOperator(
+
+        task_id = "get_webdriver_options_a",
+        python_callable = _webdriver_options
+    )
+
+    get_webdriver_options_b = PythonOperator(
+
+        task_id = "get_webdriver_options_b",
+        python_callable = _webdriver_options
+    )
+    csss = BranchOperator(
+
+        task_id = "csss",
+        python_callable = _choose_webdriver_options
+    )
+
+    accurate = BashOperator(
+
+        task_id = "accurate",
+        bash_command = "echo 'accurate'"
+    )
+    inaccurate = BashOperator(
+
+        task_id = "inaccurate",
+        bash_command = "echo 'inaccurate'"
+    )
+
+    [get_webdriver_options, get_webdriver_options_a, get_webdriver_options_b]>>csss>>[accurate, inaccurate]
