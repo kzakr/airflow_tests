@@ -86,7 +86,27 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
+networks:
+    web:
+      external: true
+      driver:  bridge
+
 services:
+
+  chrome:
+      image: selenium/standalone-chrome:latest
+      hostname: chrome
+      networks:
+        - web
+      privileged: true
+      shm_size: 2g
+  framework:
+      build: .
+      networks:
+          - web
+      depends_on: 
+          - chrome
+
   postgres:
     image: postgres:13
     environment:
@@ -299,11 +319,3 @@ services:
 
 volumes:
   postgres-db-volume:
-
-
-selenium:
-  container_name: pedantic_keldysh
-  image: seleniarm/standalone-chromium:latest
-  ports:
-    - 4444:4444
-  restart: always
