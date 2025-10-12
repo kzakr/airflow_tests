@@ -89,19 +89,7 @@ x-airflow-common:
 
 services:
 
-  chrome:
-      image: selenium/standalone-chrome:latest
-      hostname: chrome
-      networks:
-        - web
-      privileged: true
-      shm_size: 2g
-  framework:
-      build: .
-      networks:
-          - web
-      depends_on: 
-          - chrome
+
 
   postgres:
     image: postgres:13
