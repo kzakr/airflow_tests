@@ -86,10 +86,6 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
-networks:
-    web:
-      external: true
-      driver:  bridge
 
 services:
 
