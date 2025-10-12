@@ -19,7 +19,7 @@ def _launch_driver(ti):
     launched_driver = ChromeBrowser_page.open_chrome(ti_chrome_options)
     return launched_driver
 
-def _sacn_finwiz(ti):
+def _scan_finwiz(ti):
     ti_launched_driver = ti.xcom_pull(task_ids = [get_chromedrive])
     res = StockResults()
     res.run_process(how_many = res.how_many_to_repeat(how_many = 10), 
