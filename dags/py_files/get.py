@@ -167,7 +167,7 @@ class StockResults:
                         #print(main_df)
                     
                     
-            self.save_excel_file(file_to_save = main_df, path= r"C:\Users\kzakr\gielda", file_name:= 'finviz_'+str(as_of_date[0:8]), extention: r'.csv'):        
+            self.save_excel_file(file_to_save = main_df, path= r"./output_files", file_name= 'finviz_'+str(as_of_date[0:8]), extention: r'.csv'):        
             
             print(how_many)
             how_many = how_many+1
