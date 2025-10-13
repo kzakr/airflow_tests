@@ -19,18 +19,9 @@ import os
 import pandas
 from datetime import datetime
 import time
-def install_and_import(package):
-    import importlib
-    try:
-        importlib.import_module(package)
-    except ImportError:
-        import pip
-        pip.main(['install', package])
-    finally:
-        globals()[package] = importlib.import_module(package)
 
 
-install_and_import('selenium')
+
 #
 #chromedriver_autoinstaller.install()  # Check if the current version of chromedriver exists
 #                                      # and if it doesn't exist, download it automatically,
