@@ -14,8 +14,8 @@ from datetime import datetime
 import numpy as np
 #import cv2
 import os
-import pyautogui
-from PIL import Image
+#import pyautogui
+#from PIL import Image
 import pandas
 from datetime import datetime
 import time
