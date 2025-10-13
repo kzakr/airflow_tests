@@ -34,16 +34,18 @@ class ChromebrowserOption:
         pass
 
     def initialize_chrom_options(self):
-        self.chrome_options = webdriver.ChromeOptions()
-        return self.chrome_options 
+        #self.chrome_options = webdriver.ChromeOptions()
+        #return self.chrome_options 
+        pass
     
     
     def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", "--log-level=3"]):
         
-        for option in list_of_options:
-            self.chrome_options.add_argument(option)
-        
-        return self.chrome_options
+        #for option in list_of_options:
+        #    self.chrome_options.add_argument(option)
+        #
+        #return self.chrome_options
+        pass
     
 class OpenChromeBrowser:
 
@@ -51,19 +53,19 @@ class OpenChromeBrowser:
         pass
 
 
-    def open_chrome(self, options, chrome_service = Service(executable_path= r"C:\Users\kzakr\gielda\chromedriver-win64\chromedriver.exe")):
-    
-        self.driver = webdriver.Chrome(options=options,service = chrome_service)
-
-        return self.driver
-    
-    def get_web_page(self, url, delay_int = 1):
-        
-        time.sleep(delay_int)
-        
-        driver_launched = self.driver.get(url)
-
-        return driver_launched
+    #def open_chrome(self, options, chrome_service = Service(executable_path= r"C:\Users\kzakr\gielda\chromedriver-win64\chromedriver.exe")):
+    #
+    #    self.driver = webdriver.Chrome(options=options,service = chrome_service)
+#
+    #    return self.driver
+    #
+    #def get_web_page(self, url, delay_int = 1):
+    #    
+    #    time.sleep(delay_int)
+    #    
+    #    driver_launched = self.driver.get(url)
+#
+    #    return driver_launched
 
 class StockResults:
    
