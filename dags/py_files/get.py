@@ -1,12 +1,12 @@
 #yahooo
-from selenium import webdriver
-import chromedriver_autoinstaller
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-import time
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
+#from selenium import webdriver
+#import chromedriver_autoinstaller
+#from selenium.webdriver.chrome.options import Options
+#from selenium.webdriver.chrome.service import Service
+#import time
+#from selenium.webdriver.common.by import By
+#from selenium.webdriver.common.keys import Keys
+#from selenium.webdriver.common.action_chains import ActionChains
 import re
 import getpass
 import datetime
