@@ -15,7 +15,7 @@ def _webdriver_options():
     return inspect.getfile(pandas)
 
 
-with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
+with DAG(dag_id = "test_KZ", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
 
     get_webdriver_options_bc = PythonOperator(
 
