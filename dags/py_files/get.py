@@ -1,6 +1,6 @@
 #yahooo
-import selenium
-from selenium import webdriver
+
+from opt.airflow.selenium import webdriver
 import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
