@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.selenium_plugin import SeleniumOperator
+
 import datetime
 
 
