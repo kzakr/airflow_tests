@@ -2,7 +2,7 @@
 
 
 import pendulum
-import sendgrid
+import selenium
 from selenium import webdriver
 import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
