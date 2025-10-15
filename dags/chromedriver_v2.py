@@ -1,9 +1,15 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-#from airflow.operators.branch_operator import BaseBranchOperator
-from airflow.operators.bash import BashOperator
+import os
+from airflow.models import DAG
+#from airflow.operators.selenium_plugin import SeleniumOperator
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import BranchPythonOperator
+
+
+from datetime import datetime, timedelta
+import logging
 import datetime
-from py_files.get import ChromebrowserOption, OpenChromeBrowser, StockResults
+from py_files.get_v2 import  StockResults
 
 
 
@@ -13,24 +19,24 @@ def _webdriver_options():
     chrome_options = Chromebrowser.get_options()
     return chrome_options
     
-#def _launch_driver(ti):
-#    ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
-#    ChromeBrowser_page = OpenChromeBrowser()
-#    launched_driver = ChromeBrowser_page.open_chrome(ti_chrome_options)
-#    return launched_driver
+def _launch_driver(ti):
+    ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
+    ChromeBrowser_page = OpenChromeBrowser()
+    launched_driver = ChromeBrowser_page.open_chrome(ti_chrome_options)
+    return launched_driver
 
 def _scan_finwiz(ti):
-    ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
+    ti_launched_driver = ti.xcom_pull(task_ids = [get_chromedrive])
     res = StockResults()
     res.run_process(how_many = res.how_many_to_repeat(how_many = 10), 
                     grid = res.specify_grid(from_param = 1, to_param = 9921, interval_param = 20), 
-                    options = ti_chrome_options, 
+                    launched_driver = ti_launched_driver, 
                     url = r"https://finviz.com/screener.ashx?v=111&r="
                     )
 
 
 
-with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
+with DAG(dag_id = "scanfile_v2", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
 
     get_webdriver_options = PythonOperator(
 
