@@ -124,7 +124,6 @@ class StockResults:
             for i in grid:
                         #print(i)
                 d0f_dict = {}
-                launched_driver.get(url+str(i))
                 #driver.get(url+str(i))
                 
                 time.sleep(1)
