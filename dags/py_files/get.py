@@ -130,11 +130,13 @@ class StockResults:
                         #print(i)
                         d0f_dict = {}
                         #driver.get(url+str(i))
+                        print("zrzut")
 
                         time.sleep(1)
                         launched_driver.get()
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
 
+                        print("zrzut wykonany")
                         the_text = inputElement.text
                         keysy =the_text.split("\n")[0].split(" ")
                         values  =the_text.split("\n")[1:]
