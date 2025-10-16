@@ -26,8 +26,16 @@ def _webdriver_options():
 #    launched_driver = ChromeBrowser_page.open_chrome(ti_chrome_options)
 #    return launched_driver
 
-def _scan_finwiz(ti):
-    ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
+def _scan_finwiz():
+    print("kupa")
+    Chromebrowser = ChromebrowserOption()
+    print("kupa2")
+
+    Chromebrowser.initialize_chrom_options()
+    print("kupa5")
+    chrome_options = Chromebrowser.get_options()
+    print("kupa6")
+    ti_chrome_options = ti.xcom_pull(task_ids = [chrome_options])
     res = StockResults()
     res.run_process(how_many = res.how_many_to_repeat(how_many = 10), 
                     grid = res.specify_grid(from_param = 1, to_param = 9921, interval_param = 20), 
@@ -54,4 +62,4 @@ with DAG(dag_id = "chromedriver", start_date=datetime.datetime(2021, 1, 1), sche
     )
     
     
-    get_webdriver_options >> scan_finwiz
+    _ >> scan_finwiz
