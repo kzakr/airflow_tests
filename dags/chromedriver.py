@@ -62,4 +62,4 @@ with DAG(dag_id = "chromedriver", start_date=datetime.datetime(2021, 1, 1), sche
     )
     
     
-    _ >> scan_finwiz
+    scan_finwiz
