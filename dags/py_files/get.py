@@ -127,7 +127,7 @@ class StockResults:
                 #driver.get(url+str(i))
                 
                 time.sleep(1)
-                remote_webdriver = '127.0.0.1'#'chrome'
+                remote_webdriver = 'chrome'
                 with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
                     print("kolejna kupa")
 
