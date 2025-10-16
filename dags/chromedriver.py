@@ -38,11 +38,7 @@ with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule
         python_callable = _webdriver_options
     )
     
-    get_chromedrive = PythonOperator(
 
-        task_id = "get_chromedrive",
-        python_callable = _launch_driver
-    )
 
     scan_finwiz = PythonOperator(
 
@@ -51,4 +47,4 @@ with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule
     )
     
     
-    get_webdriver_options>>get_chromedrive>>scan_finwiz
+    get_webdriver_options >> scan_finwiz
