@@ -36,12 +36,15 @@ class ChromebrowserOption:
         pass
 
     def initialize_chrom_options(self):
+        print("kupa3")
         self.chrome_options = webdriver.ChromeOptions()
         return self.chrome_options 
     
     
     def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", "--log-level=3"]):
         
+        print("kupa3")
+
         for option in list_of_options:
             self.chrome_options.add_argument(option)
         

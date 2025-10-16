@@ -8,7 +8,11 @@ from py_files.get import ChromebrowserOption, OpenChromeBrowser, StockResults
 
 
 def _webdriver_options():
+
+    print("kupa")
     Chromebrowser = ChromebrowserOption()
+    print("kupa2")
+
     Chromebrowser.initialize_chrom_options()
     chrome_options = Chromebrowser.get_options()
     return chrome_options
