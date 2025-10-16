@@ -131,9 +131,10 @@ class StockResults:
                         d0f_dict = {}
                         #driver.get(url+str(i))
                         print("zrzut")
+                        launched_driver.get(url+str(i))
 
                         time.sleep(1)
-                        launched_driver.get()
+                        
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
 
                         print("zrzut wykonany")
