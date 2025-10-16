@@ -43,7 +43,7 @@ with DAG(dag_id = "scanfile", start_date=datetime.datetime(2021, 1, 1), schedule
     scan_finwiz = PythonOperator(
 
         task_id = "scan_finwiz",
-        python_callable = _sacn_finwiz
+        python_callable = _scan_finwiz
     )
     
     
