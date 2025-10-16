@@ -14,7 +14,10 @@ def _webdriver_options():
     print("kupa2")
 
     Chromebrowser.initialize_chrom_options()
+    print("kupa5")
     chrome_options = Chromebrowser.get_options()
+    print("kupa6")
+
     return chrome_options
     
 #def _launch_driver(ti):
