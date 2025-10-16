@@ -1,6 +1,6 @@
 #yahooo
 
-from home.airflow..local.lib.python3.8.site-packages import pandas
+from site-packages import pandas
 import pendulum
 import selenium
 from selenium import webdriver
