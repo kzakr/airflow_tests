@@ -1,6 +1,6 @@
 #yahooo
 
-
+from home.airflow..local.lib.python3.8.site-packages import pandas
 import pendulum
 import selenium
 from selenium import webdriver
@@ -20,7 +20,7 @@ import numpy as np
 import os
 #import pyautogui
 #from PIL import Image
-import pandas
+
 from datetime import datetime
 import time
 
