@@ -47,11 +47,11 @@ def _scan_finwiz(ti):
 
 with DAG(dag_id = "chromedriver", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
 
-    get_webdriver_options = PythonOperator(
+   #get_webdriver_options = PythonOperator(
 
-        task_id = "get_webdriver_options",
-        python_callable = _webdriver_options
-    )
+   #    task_id = "get_webdriver_options",
+   #    python_callable = _webdriver_options
+   #)
     
 
 
