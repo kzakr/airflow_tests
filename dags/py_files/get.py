@@ -1,8 +1,6 @@
 #yahooo
 
-from site-packages import pandas
-import pendulum
-import selenium
+
 from selenium import webdriver
 import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options

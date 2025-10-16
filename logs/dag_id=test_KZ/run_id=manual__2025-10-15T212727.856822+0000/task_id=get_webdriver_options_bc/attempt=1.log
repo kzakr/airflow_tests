@@ -1,0 +1,14 @@
+[2025-10-15T21:27:36.251+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: test_KZ.get_webdriver_options_bc manual__2025-10-15T21:27:27.856822+00:00 [queued]>
+[2025-10-15T21:27:36.271+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: test_KZ.get_webdriver_options_bc manual__2025-10-15T21:27:27.856822+00:00 [queued]>
+[2025-10-15T21:27:36.273+0000] {taskinstance.py:1361} INFO - Starting attempt 1 of 1
+[2025-10-15T21:27:36.310+0000] {taskinstance.py:1382} INFO - Executing <Task(PythonOperator): get_webdriver_options_bc> on 2025-10-15 21:27:27.856822+00:00
+[2025-10-15T21:27:36.335+0000] {standard_task_runner.py:57} INFO - Started process 1286 to run task
+[2025-10-15T21:27:36.359+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'test_KZ', 'get_webdriver_options_bc', 'manual__2025-10-15T21:27:27.856822+00:00', '--job-id', '13', '--raw', '--subdir', 'DAGS_FOLDER/test_KZ.py', '--cfg-path', '/tmp/tmp833zux3a']
+[2025-10-15T21:27:36.365+0000] {standard_task_runner.py:85} INFO - Job 13: Subtask get_webdriver_options_bc
+[2025-10-15T21:27:36.814+0000] {task_command.py:416} INFO - Running <TaskInstance: test_KZ.get_webdriver_options_bc manual__2025-10-15T21:27:27.856822+00:00 [running]> on host 167affc17136
+[2025-10-15T21:27:37.084+0000] {taskinstance.py:1662} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='test_KZ' AIRFLOW_CTX_TASK_ID='get_webdriver_options_bc' AIRFLOW_CTX_EXECUTION_DATE='2025-10-15T21:27:27.856822+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-10-15T21:27:27.856822+00:00'
+[2025-10-15T21:27:37.092+0000] {logging_mixin.py:151} INFO - /home/***/.local/lib/python3.8/site-packages/pandas/__init__.py
+[2025-10-15T21:27:37.093+0000] {python.py:194} INFO - Done. Returned value was: /home/***/.local/lib/python3.8/site-packages/pandas/__init__.py
+[2025-10-15T21:27:37.150+0000] {taskinstance.py:1400} INFO - Marking task as SUCCESS. dag_id=test_KZ, task_id=get_webdriver_options_bc, execution_date=20251015T212727, start_date=20251015T212736, end_date=20251015T212737
+[2025-10-15T21:27:37.218+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 0
+[2025-10-15T21:27:37.284+0000] {taskinstance.py:2778} INFO - 1 downstream tasks scheduled from follow-on schedule check

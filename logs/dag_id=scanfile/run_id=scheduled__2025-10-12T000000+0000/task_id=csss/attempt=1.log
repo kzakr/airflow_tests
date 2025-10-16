@@ -1,0 +1,67 @@
+[2025-10-13T19:30:50.607+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: scanfile.csss scheduled__2025-10-12T00:00:00+00:00 [queued]>
+[2025-10-13T19:30:50.633+0000] {taskinstance.py:1159} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: scanfile.csss scheduled__2025-10-12T00:00:00+00:00 [queued]>
+[2025-10-13T19:30:50.635+0000] {taskinstance.py:1361} INFO - Starting attempt 1 of 1
+[2025-10-13T19:30:50.677+0000] {taskinstance.py:1382} INFO - Executing <Task(BranchPythonOperator): csss> on 2025-10-12 00:00:00+00:00
+[2025-10-13T19:30:50.689+0000] {standard_task_runner.py:57} INFO - Started process 88 to run task
+[2025-10-13T19:30:50.698+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'scanfile', 'csss', 'scheduled__2025-10-12T00:00:00+00:00', '--job-id', '69', '--raw', '--subdir', 'DAGS_FOLDER/scanfile.py', '--cfg-path', '/tmp/tmpnyd8u3sc']
+[2025-10-13T19:30:50.707+0000] {standard_task_runner.py:85} INFO - Job 69: Subtask csss
+[2025-10-13T19:30:50.877+0000] {task_command.py:416} INFO - Running <TaskInstance: scanfile.csss scheduled__2025-10-12T00:00:00+00:00 [running]> on host afd0d3e13103
+[2025-10-13T19:30:51.069+0000] {taskinstance.py:1662} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='scanfile' AIRFLOW_CTX_TASK_ID='csss' AIRFLOW_CTX_EXECUTION_DATE='2025-10-12T00:00:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2025-10-12T00:00:00+00:00'
+[2025-10-13T19:30:51.090+0000] {taskinstance.py:1937} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1910, in _execute_context
+    self.dialect.do_execute(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 736, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: can't adapt type 'PythonOperator'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 226, in execute
+    branch = super().execute(context)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 192, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 209, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/scanfile.py", line 15, in _choose_webdriver_options
+    max(reu)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/xcom.py", line 720, in __next__
+    return XCom.deserialize_value(next(self._it))
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2901, in __iter__
+    result = self._iter()
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/orm/query.py", line 2916, in _iter
+    result = self.session.execute(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/orm/session.py", line 1717, in execute
+    result = conn._execute_20(statement, params or {}, execution_options)
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1710, in _execute_20
+    return meth(self, args_10style, kwargs_10style, execution_options)
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/sql/elements.py", line 334, in _execute_on_connection
+    return connection._execute_clauseelement(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1577, in _execute_clauseelement
+    ret = self._execute_context(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1953, in _execute_context
+    self._handle_dbapi_exception(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 2134, in _handle_dbapi_exception
+    util.raise_(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/base.py", line 1910, in _execute_context
+    self.dialect.do_execute(
+  File "/home/airflow/.local/lib/python3.8/site-packages/sqlalchemy/engine/default.py", line 736, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) can't adapt type 'PythonOperator'
+[SQL: SELECT xcom.value AS xcom_value 
+FROM xcom JOIN dag_run ON xcom.dag_run_id = dag_run.id 
+WHERE xcom.key = %(key_1)s AND xcom.task_id IN (%(task_id_1_1)s, %(task_id_1_2)s, %(task_id_1_3)s) AND xcom.dag_id = %(dag_id_1)s AND xcom.run_id = %(run_id_1)s ORDER BY CASE xcom.task_id WHEN %(param_1)s THEN %(param_2)s WHEN %(param_3)s THEN %(param_4)s WHEN %(param_5)s THEN %(param_6)s END, xcom.map_index]
+[parameters: {'key_1': 'return_value', 'dag_id_1': 'scanfile', 'run_id_1': 'scheduled__2025-10-12T00:00:00+00:00', 'param_1': <Task(PythonOperator): get_webdriver_options>, 'param_2': 0, 'param_3': <Task(PythonOperator): get_webdriver_options_a>, 'param_4': 1, 'param_5': <Task(PythonOperator): get_webdriver_options_b>, 'param_6': 2, 'task_id_1_1': <Task(PythonOperator): get_webdriver_options>, 'task_id_1_2': <Task(PythonOperator): get_webdriver_options_a>, 'task_id_1_3': <Task(PythonOperator): get_webdriver_options_b>}]
+(Background on this error at: https://sqlalche.me/e/14/f405)
+[2025-10-13T19:30:51.126+0000] {taskinstance.py:1400} INFO - Marking task as FAILED. dag_id=scanfile, task_id=csss, execution_date=20251012T000000, start_date=20251013T193050, end_date=20251013T193051
+[2025-10-13T19:30:51.158+0000] {standard_task_runner.py:104} ERROR - Failed to execute job 69 for task csss ((psycopg2.ProgrammingError) can't adapt type 'PythonOperator'
+[SQL: SELECT xcom.value AS xcom_value 
+FROM xcom JOIN dag_run ON xcom.dag_run_id = dag_run.id 
+WHERE xcom.key = %(key_1)s AND xcom.task_id IN (%(task_id_1_1)s, %(task_id_1_2)s, %(task_id_1_3)s) AND xcom.dag_id = %(dag_id_1)s AND xcom.run_id = %(run_id_1)s ORDER BY CASE xcom.task_id WHEN %(param_1)s THEN %(param_2)s WHEN %(param_3)s THEN %(param_4)s WHEN %(param_5)s THEN %(param_6)s END, xcom.map_index]
+[parameters: {'key_1': 'return_value', 'dag_id_1': 'scanfile', 'run_id_1': 'scheduled__2025-10-12T00:00:00+00:00', 'param_1': <Task(PythonOperator): get_webdriver_options>, 'param_2': 0, 'param_3': <Task(PythonOperator): get_webdriver_options_a>, 'param_4': 1, 'param_5': <Task(PythonOperator): get_webdriver_options_b>, 'param_6': 2, 'task_id_1_1': <Task(PythonOperator): get_webdriver_options>, 'task_id_1_2': <Task(PythonOperator): get_webdriver_options_a>, 'task_id_1_3': <Task(PythonOperator): get_webdriver_options_b>}]
+(Background on this error at: https://sqlalche.me/e/14/f405); 88)
+[2025-10-13T19:30:51.194+0000] {local_task_job_runner.py:228} INFO - Task exited with return code 1
+[2025-10-13T19:30:51.274+0000] {taskinstance.py:2778} INFO - 0 downstream tasks scheduled from follow-on schedule check
