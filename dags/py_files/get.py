@@ -128,7 +128,7 @@ class StockResults:
                 
                 time.sleep(1)
                 remote_webdriver = 'chrome'
-                with webdriver.Remote(f'{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
+                with webdriver.Remote(f'http://'{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
 
  
 
