@@ -180,7 +180,7 @@ class StockResults:
                                 #print(main_df)
                     
                     
-            self.save_excel_file(file_to_save = main_df, path= "./output_files", file_name= "finviz_" + str(as_of_date[0:8]), extention= '.csv')
+            self.save_excel_file(file_to_save = main_df, path= "./output_files", file_name= "finviz_" + str(dt_string), extention= '.csv')
 
             
             print(how_many)
