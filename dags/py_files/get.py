@@ -134,11 +134,11 @@ class StockResults:
                         print("zrzut")
                         launched_driver.get(url+str(i))
 
-                        time.sleep(1)
+                        time.sleep(2)
                         
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
 
-                        print(inputElement.text)
+                        #print(inputElement.text)
                         the_text = inputElement.text
                         keysy =the_text.split("\n")[0].split(" ")
                         values  =the_text.split("\n")[1:]
@@ -181,7 +181,7 @@ class StockResults:
                                 #print(main_df)
                     
                     
-            self.save_excel_file(file_to_save = main_df, path= "/opt/airflow/dags/output_files", file_name= "finviz_" + str(dt_string), extention= '.csv')
+            self.save_excel_file(file_to_save = main_df, path= "/opt/airflow/dags/output_files", file_name= "finviz_" + str(dt_string[0:8]), extention= '.csv')
 
             
             print(how_many)
