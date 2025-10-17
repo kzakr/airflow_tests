@@ -38,7 +38,7 @@ def _scan_finwiz(ti):
     #ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
     res = StockResults()
     res.run_process(how_many = res.how_many_to_repeat(how_many = 10), 
-                    grid = res.specify_grid(from_param = 1, to_param = 9921, interval_param = 20), 
+                    grid = res.specify_grid(from_param = 1, to_param = 21, interval_param = 20), #9921
                     options = chrome_options, 
                     url = r"https://finviz.com/screener.ashx?v=111&r="
                     )
