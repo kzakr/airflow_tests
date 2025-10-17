@@ -105,8 +105,9 @@ class StockResults:
     
     def save_excel_file(self, file_to_save, path: str, file_name:str, extention: str = 'csv'):
         
-        with open(os.path.join(path, file_name+ extention), "w") as my_file:
-            my_file.write(file_to_save)
+        file_to_save.to_csv(os.path.join(path, file_name+ extention))
+        #with open(os.path.join(path, file_name+ extention), "w") as my_file:
+        #    my_file.write(file_to_save)
 
 
     def run_process(self, how_many: int, grid: list, url : str, options):
