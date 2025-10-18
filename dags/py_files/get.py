@@ -120,14 +120,14 @@ class StockResults:
         main_df = pd.DataFrame()
 
 
+        remote_webdriver = 'chrome'
         i = 0
         while i< how_many:
+            for i in grid:
             
-            remote_webdriver = 'chrome'
-            with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
-                    print("kolejna kupa")
 
-                    for i in grid:
+                    with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
+                        print("kolejna kupa")
                         #print(i)
                         d0f_dict = {}
                         #driver.get(url+str(i))
