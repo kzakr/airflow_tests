@@ -135,19 +135,26 @@ class StockResults:
                     #driver.get(url+str(i))
                     print("zrzut")
                     launched_driver.get(url+str(i))
+                    print("zrzut1")
                     time.sleep(4)
-                    
+                    print("zrzut2")
                     inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #print(inputElement.text)
+                    print("zrzut3")
                     the_text = inputElement.text
+                    print("zrzut4")
                     keysy =the_text.split("\n")[0].split(" ")
+                    print("zrzut5")
                     values  =the_text.split("\n")[1:]
+                    print("zrzut6")
                         #print(the_text)
                     values_loop = 0
+                    print("zrzut8")
                         #print(values_loop)
                         #print(values)
                     #print('ww' +str(55))
                     for value in values:
+                        print("zrzut8")
                         print(value)
                         if values_loop == len(keysy):
                             values_loop = 0
@@ -160,8 +167,10 @@ class StockResults:
                             #print(values_loop)
                             #print(keysy[values_loop])
                             print(value)
+                        print("zrzut9")
                         df_dict[keysy[values_loop]] = value
                         values_loop +=1
+                        print("zrzut9")
                             #df_dict['current_price'] = the_text_2
                         temp_df = pd.DataFrame(df_dict, index=[0])
                         temp_df['ticker'] = i
