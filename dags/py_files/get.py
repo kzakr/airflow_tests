@@ -144,18 +144,20 @@ class StockResults:
 
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     
-                    except WebDriverException:
+                    except Exception as ex:
 
                         try:
 
                             launched_driver.get(url+str(i))
-                            print("2nd attempt")
+                            print(ex)
+                            print("2nd attempt" )
                             print(url+str(i) )
 
                             time.sleep(2)
 
                             inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
-                        except WebDriverException:
+                        except Exception as ex:
+                            print(ex)
                             pass
 
                     
@@ -184,12 +186,8 @@ class StockResults:
                             #print(values_loop)
                         elif values_loop ==7:
                             values_loop +=1
-                           # print(value)
-                            #print(keysy)
-                            #print("###")
-                            print(values_loop)
-                            #print(keysy[values_loop])
-                            #print(value)
+
+
                         #print("zrzut9")
                         df_dict[keysy[values_loop]] = value
                         values_loop +=1
