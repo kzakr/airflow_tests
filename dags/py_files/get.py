@@ -147,7 +147,7 @@ class StockResults:
                         print(ex)
                         launched_driver.get(url+str(i))
                         print(url+str(i))
-                        time.sleep(8)
+                        time.sleep(3)
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
                         
@@ -211,19 +211,20 @@ class StockResults:
                         #print("zrzut9")
                         try:
                             df_dict[keysy[values_loop]] = value
+                            temp_df = pd.DataFrame(df_dict, index=[0])
+                            temp_df['ticker'] = i
+                            temp_df['time'] = dt_string
+                            #print(temp_df)
 
                         except Exception as ex:
                             print(ex)
-                            print(value)
+                            
 
 
                         values_loop +=1
                         #print("zrzut9")
                             #df_dict['current_price'] = the_text_2
-                        temp_df = pd.DataFrame(df_dict, index=[0])
-                        temp_df['ticker'] = i
-                        temp_df['time'] = dt_string
-                        #print(temp_df)
+                        
                             #print(temp_df)
                 del temp_df
                                 #print(main_df)
