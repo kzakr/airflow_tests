@@ -160,11 +160,14 @@ class StockResults:
                             values_loop = 0
                             main_df= pd.concat([main_df, temp_df])    
                             #else:
+                            print("###")
+                            print(values_loop)
                         elif values_loop ==7:
                             values_loop +=1
                            # print(value)
                             #print(keysy)
-                            #print(values_loop)
+                            print("###")
+                            print(values_loop)
                             #print(keysy[values_loop])
                             print(value)
                         print("zrzut9")
