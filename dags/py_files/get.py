@@ -134,12 +134,16 @@ class StockResults:
                     #print(i)
                     d0f_dict = {}
                     #driver.get(url+str(i))
+                    try:
 
-                    launched_driver.get(url+str(i))
-                    print(url+str(i))
-                    time.sleep(2)
-                    inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                        launched_driver.get(url+str(i))
+                        print(url+str(i))
+                        time.sleep(2)
+                        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
+                    except Exception as ex:
+                        print(ex)
+                        pass
                     #print("zrzut")
                     #try:
                     #    
