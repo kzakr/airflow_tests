@@ -100,6 +100,9 @@ services:
        hostname: chrome
        privileged: true
        shm_size: 2g
+       ports:
+        - 4444:4444
+       restart: always
 
 
 
@@ -138,9 +141,11 @@ services:
   postgres:
     image: postgres:13
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:

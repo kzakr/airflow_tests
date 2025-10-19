@@ -147,6 +147,7 @@ class StockResults:
                     except Exception as ex:
 
                         try:
+                            time.sleep(10)
 
                             launched_driver.get(url+str(i))
                             print(ex)
