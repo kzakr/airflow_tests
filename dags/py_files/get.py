@@ -126,10 +126,10 @@ class StockResults:
         i = 0
         while i< how_many:
 
-            with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
+            for i in grid:
 
-                for i in grid:
-            
+                
+                with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
 
                     #print("kolejna kupa")
                     #print(i)
@@ -184,6 +184,7 @@ class StockResults:
                     
                     the_text = inputElement.text
                     #print("zrzut4")
+                    launched_driver.close()
                     keysy =the_text.split("\n")[0].split(" ")
                     #print("zrzut5")
                     values  =the_text.split("\n")[1:]
@@ -217,11 +218,11 @@ class StockResults:
                         temp_df['time'] = dt_string
                         #print(temp_df)
                             #print(temp_df)
-                    del temp_df
+                del temp_df
                                 #print(main_df)
                     
                     
-                #self.save_excel_file(file_to_save = main_df, path= "/opt/airflow/dags/output_files", file_name= "finviz_" + str(dt_string[0:8]), extention= '.csv')
+            self.save_excel_file(file_to_save = main_df, path= "/opt/airflow/dags/output_files", file_name= "finviz_" + str(dt_string[0:8]), extention= '.csv')
 
             
                 print(how_many)
