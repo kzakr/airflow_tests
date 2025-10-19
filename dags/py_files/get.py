@@ -135,6 +135,7 @@ class StockResults:
                     #driver.get(url+str(i))
                     print("zrzut")
                     launched_driver.get(url+str(i))
+                    print(url+str(i))
                     #print("zrzut1")
                     #time.sleep(4)
                     #print("zrzut2")
