@@ -42,7 +42,8 @@ class ChromebrowserOption:
         return self.chrome_options 
     
     
-    def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", "--log-level=3", "--disable-gpu"]):
+    def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", 
+                                                    "--log-level=3", "--disable-gpu", "--disable-dev-shm-usage"]):
         
         print("kupa3")
 
@@ -138,12 +139,18 @@ class StockResults:
 
                         launched_driver.get(url+str(i))
                         print(url+str(i))
-                        time.sleep(2)
+                        time.sleep(4)
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
                     except Exception as ex:
                         print(ex)
-                        pass
+                        time.sleep(8)
+                        launched_driver.get(url+str(i))
+                        print(url+str(i))
+                        time.sleep(5)
+                        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                   
+                        
                     #print("zrzut")
                     #try:
                     #    
