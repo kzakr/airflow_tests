@@ -221,12 +221,12 @@ class StockResults:
                 del temp_df
                                 #print(main_df)
                     
-                    
+                print(how_many)
+                how_many = how_many+1   
             self.save_excel_file(file_to_save = main_df, path= "/opt/airflow/dags/output_files", file_name= "finviz_" + str(dt_string[0:8]), extention= '.csv')
 
             
-                print(how_many)
-                how_many = how_many+1
+                
 
 
         
