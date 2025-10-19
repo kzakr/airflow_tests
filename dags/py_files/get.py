@@ -209,7 +209,14 @@ class StockResults:
 
 
                         #print("zrzut9")
-                        df_dict[keysy[values_loop]] = value
+                        try:
+                            df_dict[keysy[values_loop]] = value
+
+                        except Exception as ex:
+                            print(ex)
+                            print(value)
+
+
                         values_loop +=1
                         #print("zrzut9")
                             #df_dict['current_price'] = the_text_2
