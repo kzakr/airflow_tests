@@ -9,14 +9,14 @@ from py_files.get import ChromebrowserOption, OpenChromeBrowser, StockResults
 
 def _webdriver_options():
 
-    print("kupa")
+    
     Chromebrowser = ChromebrowserOption()
-    print("kupa2")
+    
 
     Chromebrowser.initialize_chrom_options()
-    print("kupa5")
+    
     chrome_options = Chromebrowser.get_options()
-    print("kupa6")
+   
 
     return chrome_options
     
@@ -27,14 +27,13 @@ def _webdriver_options():
 #    return launched_driver
 
 def _scan_finwiz(ti):
-    print("kupa")
+    
     Chromebrowser = ChromebrowserOption()
-    print("kupa2")
-
+    
     Chromebrowser.initialize_chrom_options()
-    print("kupa5")
+    
     chrome_options = Chromebrowser.get_options()
-    print("kupa6")
+    
     #ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
     res = StockResults()
     res.run_process(how_many = res.how_many_to_repeat(how_many = 10), 

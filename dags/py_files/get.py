@@ -160,7 +160,7 @@ class StockResults:
 
                     
                     
-                    selenium.common.exceptions.WebDriverException
+                    
                     the_text = inputElement.text
                     #print("zrzut4")
                     keysy =the_text.split("\n")[0].split(" ")
