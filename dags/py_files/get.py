@@ -134,32 +134,38 @@ class StockResults:
                     #print(i)
                     d0f_dict = {}
                     #driver.get(url+str(i))
+
+                    launched_driver.get(url+str(i))
+                    print(url+str(i))
+                    time.sleep(2)
+                    inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                    #
                     #print("zrzut")
-                    try:
-                        
-                        launched_driver.get(url+str(i))
-                        print(url+str(i))
-
-                        time.sleep(2)
-
-                        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
-                    
-                    except Exception as ex:
-
-                        try:
-                            time.sleep(10)
-
-                            launched_driver.get(url+str(i))
-                            print(ex)
-                            print("2nd attempt" )
-                            print(url+str(i) )
-
-                            time.sleep(2)
-
-                            inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
-                        except Exception as ex:
-                            print(ex)
-                            pass
+                    #try:
+                    #    
+                    #    launched_driver.get(url+str(i))
+                    #    print(url+str(i))
+#
+                    #    time.sleep(2)
+#
+                    #    inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                    #
+                    #except Exception as ex:
+#
+                    #    try:
+                    #        time.sleep(10)
+#
+                    #        launched_driver.get(url+str(i))
+                    #        print(ex)
+                    #        print("2nd attempt" )
+                    #        print(url+str(i) )
+#
+                    #        time.sleep(2)
+#
+                    #        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                    #    except Exception as ex:
+                    #        print(ex)
+                    #        pass
 
                     
                     
