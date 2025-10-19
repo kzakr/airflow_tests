@@ -143,8 +143,13 @@ class StockResults:
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
                     except Exception as ex:
+                        print(12)
                         print(ex)
-                        inputElement = ""
+                        launched_driver.get(url+str(i))
+                        print(url+str(i))
+                        time.sleep(8)
+                        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                    #
                         
                         
                     #print("zrzut")
