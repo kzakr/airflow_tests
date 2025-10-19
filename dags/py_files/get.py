@@ -9,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import WebDriverException
 import re
 import getpass
 import datetime
@@ -134,14 +135,32 @@ class StockResults:
                     d0f_dict = {}
                     #driver.get(url+str(i))
                     #print("zrzut")
-                    launched_driver.get(url+str(i))
-                    print(url+str(i))
-                    #print("zrzut1")
-                    time.sleep(2)
-                    #print("zrzut2")
-                    inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
-                    #print(inputElement.text)
-                    #print("zrzut3")
+                    try:
+                        
+                        launched_driver.get(url+str(i))
+                        print(url+str(i))
+
+                        time.sleep(2)
+
+                        inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                    
+                    except WebDriverException:
+
+                        try:
+
+                            launched_driver.get(url+str(i))
+                            print("2nd attempt")
+                            print(url+str(i) )
+
+                            time.sleep(2)
+
+                            inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
+                        except WebDriverException:
+                            pass
+
+                    
+                    
+                    selenium.common.exceptions.WebDriverException
                     the_text = inputElement.text
                     #print("zrzut4")
                     keysy =the_text.split("\n")[0].split(" ")
