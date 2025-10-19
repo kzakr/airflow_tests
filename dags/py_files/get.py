@@ -169,7 +169,7 @@ class StockResults:
                             print("###")
                             print(values_loop)
                             #print(keysy[values_loop])
-                            print(value)
+                            #print(value)
                         print("zrzut9")
                         df_dict[keysy[values_loop]] = value
                         values_loop +=1
