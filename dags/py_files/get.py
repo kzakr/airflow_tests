@@ -139,7 +139,7 @@ class StockResults:
 
                         launched_driver.get(url+str(i))
                         print(url+str(i))
-                        time.sleep(5)
+                        time.sleep(2)
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
                     except Exception as ex:
