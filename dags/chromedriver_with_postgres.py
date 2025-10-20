@@ -56,7 +56,7 @@ with DAG(dag_id = "chromedriver_with_postgres", start_date=datetime.datetime(202
     
     create_db_table_task = PostgresOperator(
         task_id='create_db_tables',
-        postgres_conn_id="{{ dag_run.conf['environment'] }}",
+        postgres_conn_id="airflow",
         sql='finwiz_result_create_table.sql'
     )
 
