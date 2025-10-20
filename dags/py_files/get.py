@@ -151,7 +151,7 @@ class StockResults:
                         inputElement = launched_driver.find_element(By.XPATH, "//table[@class='styled-table-new is-rounded is-tabular-nums w-full screener_table']")
                     #
                         
-                    launched_driver.quit()   
+                    launched_driver.close()   
                     #print("zrzut")
                     #try:
                     #    
