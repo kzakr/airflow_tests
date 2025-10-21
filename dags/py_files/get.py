@@ -122,7 +122,7 @@ class StockResults:
         main_df = pd.DataFrame()
 
 
-        remote_webdriver = 'firefox'
+        remote_webdriver = 'localhost'
         i = 0
         while i< how_many:
 
