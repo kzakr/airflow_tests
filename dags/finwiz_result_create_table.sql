@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS finwiz_result (
     Price DECIMAL(38,8)	,
     Change_	DECIMAL(38,8),
     Volume	DECIMAL(38,8),
-    ticker	VARCHAR(100),
     time_day VARCHAR(100)
 
 );
