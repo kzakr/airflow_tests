@@ -42,8 +42,8 @@ class ChromebrowserOption:
         return self.chrome_options 
     
     
-    def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", 
-                                                    "--log-level=3", "--disable-gpu", "--disable-dev-shm-usage"]):
+    def get_options(self, list_of_options : list = [ "-headless", 
+                                                    ]):#"--no-sandbox", "--log-level=3", "--disable-gpu", "--disable-dev-shm-usage""--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", 
         
         print("kupa3")
 
