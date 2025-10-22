@@ -38,7 +38,7 @@ class ChromebrowserOption:
 
     def initialize_chrom_options(self):
         print("kupa3")
-        self.chrome_options = webdriver.ChromeOptions()
+        self.chrome_options = webdriver.Firefox()#webdriver.ChromeOptions()
         return self.chrome_options 
     
     
