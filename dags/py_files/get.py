@@ -38,12 +38,12 @@ class ChromebrowserOption:
 
     def initialize_chrom_options(self):
         print("kupa3")
-        self.chrome_options = webdriver.Firefox()#webdriver.ChromeOptions()
+        self.chrome_options = webdriver.ChromeOptions() #webdriver.Firefox()#webdriver
         return self.chrome_options 
     
     
-    def get_options(self, list_of_options : list = [ "-headless", 
-                                                    ]):#"--no-sandbox", "--log-level=3", "--disable-gpu", "--disable-dev-shm-usage""--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", 
+    def get_options(self, list_of_options : list = ["--disable-extensions", "--incognito", "--disable-search-engine-choice-screen", "--no-sandbox", 
+                                                    "--log-level=3", "--disable-gpu", "--disable-dev-shm-usage"]):
         
         print("kupa3")
 
@@ -122,7 +122,7 @@ class StockResults:
         main_df = pd.DataFrame()
 
 
-        remote_webdriver = 'firefox'
+        remote_webdriver = 'chrome'
         i = 0
         while i< how_many:
 
