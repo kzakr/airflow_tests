@@ -106,9 +106,37 @@ services:
        hostname: chrome
        privileged: true
        shm_size: 2g
-       ports:
-        - 4444:4444
-       restart: always
+       depends_on:
+        - selenium-hub
+       environment:
+        - SE_EVENT_BUS_HOST=selenium-hub
+       #ports:
+       # - 4444:4444
+       #restart: always
+  edge:
+    image: selenium/node-edge:4.37.0-20251020
+    platform: linux/amd64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+
+  firefox:
+    image: selenium/node-firefox:4.37.0-20251020
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+
+  selenium-hub:
+    image: selenium/hub:4.37.0-20251020
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
 
 
 
