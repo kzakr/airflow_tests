@@ -49,7 +49,7 @@ class ChromebrowserOption:
 
         for option in list_of_options:
             self.chrome_options.add_argument(option)
-        
+        print("kupa4")
         return self.chrome_options
     
 class OpenChromeBrowser:
@@ -131,7 +131,7 @@ class StockResults:
                 
                 with webdriver.Remote(f'http://{remote_webdriver}:4444/wd/hub', options=options) as launched_driver:
 
-                    #print("kolejna kupa")
+                    print("kolejna kupa")
                     #print(i)
                     d0f_dict = {}
                     #driver.get(url+str(i))
