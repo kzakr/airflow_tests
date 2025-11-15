@@ -6,3 +6,5 @@
 *cfg
 *.pyc
 latest
+.env
+*.env

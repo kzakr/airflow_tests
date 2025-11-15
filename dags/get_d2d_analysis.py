@@ -195,7 +195,7 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2021, 1, 1), 
     execute_add_first_price_validation_data = PostgresOperator(
         task_id='create_db_tables',
         postgres_conn_id="airflow",
-        sql="./dags/sql_scipts/join_first_price.sql"',
+        sql="./dags/sql_scipts/join_first_price.sql",
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
@@ -248,5 +248,5 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2021, 1, 1), 
     #)
     
     
-    create_db_tables_task>>prepare_set_of_results #>>split_results >> upload_to_postgres
+    create_db_tables_task>>prepare_set_of_results >> [add_first_price_validation_data, add_last_price_validation_data]>>[execute_add_first_price_validation_data, execute_add_last_price_validation_data]
     #prepare_set_of_results
