@@ -2,4 +2,5 @@
 *xlsx
 *.cfg
 *.log
-*pid
+*.pid
+*cfg

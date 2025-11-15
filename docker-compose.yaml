@@ -29,6 +29,7 @@
 #                                Default: 50000
 # AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
 #                                Default: .
+
 # Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
 #
 # _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
@@ -44,6 +45,8 @@
 #
 # Feel free to modify this file to suit your needs.
 ---
+
+
 #version: '3.8'
 x-airflow-common:
   &airflow-common
@@ -66,6 +69,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__CORE__TEST_CONNECTION: 'Enabled'
+    AIRFLOW_PROJ_DIR: '/opt/airflow'
     POSTGRES_USER: 'airflow'
     POSTGRES_PASSWORD: 'airflow'
     POSTGRES_DB: 'airflow'
@@ -80,6 +84,7 @@ x-airflow-common:
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/py_files:/opt/airflow/py_files
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
@@ -335,8 +340,8 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        mkdir -p /sources/logs /sources/dags /sources/plugins /sources/py_files
+        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins, py_files}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:

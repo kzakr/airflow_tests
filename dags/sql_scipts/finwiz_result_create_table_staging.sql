@@ -1,0 +1,28 @@
+DROP Table if EXISTS finviz_result_staging;
+CREATE TABLE if not exists finviz_result_staging(
+    no_ integer,
+    ticker varchar(100),
+    company varchar(100),
+    sector varchar(100),
+    industry varchar(100),
+    country varchar(100),
+    market varchar(100),
+    p_e numeric(38,8),
+    price numeric(38,8),
+    change_ varchar(100),
+    volume numeric(38,8),
+    full_date integer,
+    full_date_ticker varchar(100),
+    time_ varchar(100),
+    volume_mean numeric(38,8),
+    volume_std numeric(38,8),
+    price_mean numeric(38,8), 
+    price_std numeric(38,8),
+    volume_mean_all numeric(38,8), 
+    volume_std_all numeric(38,8),
+    price_mean_all numeric(38,8), 
+    price_std_all numeric(38,8),
+    z_score numeric(38,8),
+    z_score_price numeric(38,8)
+);
+

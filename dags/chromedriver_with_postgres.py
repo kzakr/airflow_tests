@@ -1,11 +1,41 @@
+import sys
+import os
+from pathlib import Path
+
+os.chdir(os.path.dirname(os.getcwd()))
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
+print("dsadsa")
 from airflow.operators.bash import BashOperator
 import datetime
+from datetime import timedelta
+import psycopg2
 from py_files.get import ChromebrowserOption, OpenChromeBrowser, StockResults
 #from sql_scipts import finwiz_result_create_table
+import pandas as pd
+import logging
+from psycopg2 import sql
+from py_files.postgres_bulk import psql_insert_copy
+from sqlalchemy import create_engine
+import time
+from py_files.analyze_results import upload_data_to_postgres
+from py_files.get_postgres_data import sql_to_dataframe
+from typing import List
+
+#def _get_data_postgres():
+#    connection = create_connection_for_import()
+#
+#    print(connection)
+#    #with open("./sql_scipts/get_data_from_postgres.sql", "r") as file:
+#    #    sql_query = file.read()
+#    sql_query = "select * from finviz_result"
+#
+#    df= sql_to_dataframe(conn= connection, query=sql_query)
+#
+#    return df
 
 
 
@@ -21,6 +51,14 @@ def _webdriver_options():
    
 
     return chrome_options
+
+
+def _upload_data_to_postgres(ti):
+    print("Yet to pull")
+    #ti_DataFrame = ti.xcom_pull(task_ids = [get_data_postgres])
+    print("pulled")
+    upload_data_to_postgres() 
+    
     
 #def _launch_driver(ti):
 #    ti_chrome_options = ti.xcom_pull(task_ids = [get_webdriver_options])
@@ -54,17 +92,66 @@ with DAG(dag_id = "chromedriver_with_postgres", start_date=datetime.datetime(202
    #    python_callable = _webdriver_options
    #)
     
+    #get_data_postgres = PythonOperator(
+    #    task_id='get_data_postgres',
+    #    python_callable = _get_data_postgres,
+    #    retries=4,
+    #    retry_delay=timedelta(minutes=3),
+    #
+    #)
+    
     create_db_table_task = PostgresOperator(
         task_id='create_db_tables',
         postgres_conn_id="airflow",
-        sql='finwiz_result_create_table.sql'
+        sql='./sql_scipts/finwiz_result_create_table.sql',
+        retries=3,
+        retry_delay=timedelta(minutes=3),
+    )
+    create_db_staging_table_task = PostgresOperator(
+        task_id='create_db_staging_tables',
+        postgres_conn_id="airflow",
+        sql='./sql_scipts/finwiz_result_create_table_staging.sql',
+        retries=3,
+        retry_delay=timedelta(minutes=3),
+    )
+    insert_into_db_table_task = PostgresOperator(
+        task_id='insert_db_table',
+        postgres_conn_id="airflow",
+        sql='./sql_scipts/finwiz_result_insert_staging.sql',
+        retries=3,
+        retry_delay=timedelta(minutes=3),
     )
 
-    scan_finwiz = PythonOperator(
+    upload_data_to_postgres_loop = PythonOperator(
+        task_id='upload_data_to_postgres_loop',
+        python_callable = _upload_data_to_postgres,
+        retries=4,
+        retry_delay=timedelta(minutes=3),
 
-        task_id = "scan_finwiz",
-        python_callable = _scan_finwiz
     )
+
+    #copy_csv_to_table = PythonOperator(
+    #    task_id='copy_csv_to_table',
+    #    python_callable=copy_csv_to_table
+    #    
+    #)
+    #copy_csv_to_table = PythonOperator(
+    #    task_id='copy_csv_to_table',
+    #    python_callable=copy_csv_to_table
+    #    
+    #)
+    #write_df_to_postgres = PythonOperator(
+    #    task_id='write_df_to_postgres',
+    #    python_callable=write_df_to_postgres,
+    #    retries=1,
+    #    retry_delay=timedelta(seconds=15))
+    
+
+    #scan_finwiz = PythonOperator(
+#
+    #    task_id = "scan_finwiz",
+    #    python_callable = _scan_finwiz
+    #)
     
     
-    create_db_table_task >> scan_finwiz
+    [create_db_table_task, create_db_staging_table_task] >>upload_data_to_postgres_loop >> insert_into_db_table_task
