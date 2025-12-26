@@ -5,41 +5,74 @@ from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.bash import BashOperator
 import datetime
 from datetime import timedelta
-from py_files.get_d2d_indicators import get_raw_data, get_statistical_metrics, get_lagged_data, get_data, get_last_price, get_first_price, join_operator
+from py_files.get_d2d_indicators import get_raw_data, get_statistical_metrics_avg, get_statistical_metrics_std, get_lagged_data, get_data, get_last_price, get_first_price, join_operator, sql_merge_operator
 from py_files.d2d_rules import volume_and_price_declining_3, volume_below_08_average,volume_and_price_raising_3, volume_declining_3, \
     volume_declining_with_multiplicator, volume_price_declining_2, price_declining_3, sql_volume_and_price_declining_3, \
     sql_price_declining_3, sql_volume_and_price_raising_3, sql_volume_below_08_average, sql_volume_declining_3, sql_volume_declining_with_multiplicator, sql_volume_price_declining_2
 from py_files.commons import add_column_based_on_confition, types_mapper
 from py_files.attr import CommonConditions, JoinOperators
 from py_files.postgres_bulk import create_connection, sql_to_dataframe, postgres_bulk
+from airflow.operators.email_operator import EmailOperator
+from airflow.hooks.base_hook import BaseHook
+from py_files.commons import get_time
+from py_files.mail_operator import MessageOperator
+from py_files.email_templates.message_body import get_statistical_results
 
 
 
-def _add_first_price_validation_data(ti):
-    list_of_results = ti.xcom_pull(task_ids = [prepare_set_of_results])
-    for result in list_of_results:
-        query = join_operator(target = result, source =get_first_price(), columns_to_join = ["first_price"], keys = ["ticker"], join_operator= JoinOperators.Join)
 
-    with open("./dags/sql_scipts/join_first_price.sql", "a") as file:
-        file.write(query)
+connection = BaseHook.get_connection("email_conn")
+slack_token = connection.password
+connection_user = connection.login
+now, dt_string_with_hour, dt_string = get_time()
+subject = f"bajojoajp {dt_string}"
 
-def _add_last_price_validation_data(ti):
-    list_of_results = ti.xcom_pull(task_ids = [prepare_set_of_results])
-    for result in list_of_results:
-        query = join_operator(target = result, source =get_last_price(), columns_to_join = ["last_price"], keys = ["ticker"], join_operator= JoinOperators.Join)
+def prepare_message(**kwargs):
+    ti = kwargs['ti']
+    list_of_results = ti.xcom_pull(task_ids = "prepare_set_of_results_task", key='pass_rules')
+    print(list_of_results)
+    email_message = MessageOperator(sender_email = connection_user, password = slack_token)
+    session =  email_message.initialize_session()
+    email_message.bulid_base_msg()
+    email_message.get_sender()
+    email_message.create_recepient_list(("kzakrzewski17@gmail.com"))
+    email_message.get_subject(subject)
+    email_message.get_body(get_statistical_results(list_of_results))
+    email_message.release_message(session)    
 
-    with open("./dags/sql_scipts/join_last_price.sql", "a") as file:
-        file.write(query)
+def _add_first_price_validation_data(**kwargs):
+    with open("./dags/sql_scipts/join_first_price.sql", "w") as file:
+        ti = kwargs['ti']
+        list_of_results = ti.xcom_pull(task_ids = "prepare_set_of_results_task", key='pass_rules')
+        print("###"*34)
+        print(list_of_results)
+        for result in list_of_results:
+            query = sql_merge_operator(target = result+"_yday", source =get_first_price(), columns_to_merge = ["first_price"], keys = ["ticker"])
+
+    
+            file.write(query)
+
+def _add_last_price_validation_data(**kwargs):
+    with open("./dags/sql_scipts/join_last_price.sql", "w") as file:
+        ti = kwargs['ti']
+        list_of_results = ti.xcom_pull(task_ids = "prepare_set_of_results_task", key='pass_rules')
+        for result in list_of_results:
+            query = sql_merge_operator(target = result+"_yday", source =get_last_price(), columns_to_merge = ["last_price"], keys = ["ticker"])
+
+    
+            file.write(query)
 
 
 def _return_set_of_rules():
     return ( sql_volume_and_price_declining_3, sql_price_declining_3, sql_volume_and_price_raising_3, sql_volume_declining_3,  sql_volume_price_declining_2, sql_volume_below_08_average)
 
-def _prepare_set_of_results():
+def _prepare_set_of_results(**kwargs):
     
     print("ok")
 
     sql_query = get_lagged_data()
+    with open("./dags/sql_scipts/sql_query_check.sql", "a") as file:
+        file.write(sql_query)
     df =  sql_to_dataframe( query=sql_query, conn= create_connection())
 
     columns_of_df = df.columns.tolist()
@@ -78,10 +111,9 @@ def _prepare_set_of_results():
     for rule, df in dict_of_df.items():
         print(df)
 
-        #create_sql_script(rule = rule+"_y_day", DataFrame=df) #one time use for creating table
-        postgres_bulk(df, rule+"_y_day",if_exists="replace", engine_conn= create_connection())
-
-    return rules
+        #create_sql_script(rule = rule+"_yday", DataFrame=df) #one time use for creating table
+        postgres_bulk(df, rule+"_yday",if_exists="replace", engine_conn= create_connection())
+    kwargs["ti"].xcom_push(key='pass_rules', value = rules)
 
 
 
@@ -134,6 +166,7 @@ def create_sql_script(rule :str, DataFrame):
         query += f"\n\t{column}  {dict_of_types[type_]},"
     query += f");\n\n"   
     query = query.replace(",)",")")
+    print()
 
 
     with open("./dags/sql_scipts/create_analytics_tables.sql", "a") as file:
@@ -142,7 +175,7 @@ def create_sql_script(rule :str, DataFrame):
 
     
     
-with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
+with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2020, 1, 1), schedule="45 22 * * 1-5", catchup = False) as dag:
 
    #get_webdriver_options = PythonOperator(
 
@@ -159,8 +192,8 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2021, 1, 1), 
     #)
 
 
-    create_db_tables_task = PostgresOperator(
-        task_id='create_db_tables',
+    create_db_tables_task_task = PostgresOperator(
+        task_id='create_db_tables_task',
         postgres_conn_id="airflow",
         sql='./sql_scipts/create_analytics_tables.sql',
         retries=3,
@@ -168,85 +201,63 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2021, 1, 1), 
     )
     
 
-    prepare_set_of_results = PythonOperator(
-        task_id='prepare_set_of_results',
+    prepare_set_of_results_task = PythonOperator(
+        task_id='prepare_set_of_results_task',
         python_callable = _prepare_set_of_results,
         retries=4,
         retry_delay=timedelta(minutes=3),
 
     )
 
-    add_first_price_validation_data = PythonOperator(
-        task_id='_add_first_price_validation_data',
+    add_first_price_validation_data_task = PythonOperator(
+        task_id='add_first_price_validation_data_task',
         python_callable = _add_first_price_validation_data,
         retries=2,
         retry_delay=timedelta(minutes=3),
 
+
     )
 
-    add_last_price_validation_data = PythonOperator(
-        task_id='add_last_price_validation_data',
+    add_last_price_validation_data_task = PythonOperator(
+        task_id='add_last_price_validation_data_task',
         python_callable = _add_last_price_validation_data,
         retries=2,
         retry_delay=timedelta(minutes=3),
 
+
     )
 
-    execute_add_first_price_validation_data = PostgresOperator(
-        task_id='create_db_tables',
+    execute_add_first_price_validation_data_task = PostgresOperator(
+        task_id='execute_add_first_price_validation_data_task',
         postgres_conn_id="airflow",
-        sql="./dags/sql_scipts/join_first_price.sql",
+        sql="./sql_scipts/join_first_price.sql",
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
 
-    execute_add_last_price_validation_data = PostgresOperator(
-        task_id='create_db_tables',
+    execute_add_last_price_validation_data_task = PostgresOperator(
+        task_id='execute_add_last_price_validation_data_task',
         postgres_conn_id="airflow",
-        sql="./dags/sql_scipts/join_first_price.sql",
+        sql="./sql_scipts/join_last_price.sql",
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
 
-    #split_results = PythonOperator(
-    #    task_id='split_results',
-    #    python_callable = _split_results,
-    #    retries=4,
-    #    retry_delay=timedelta(minutes=3),
-#
-    #)
-#
-    #upload_to_postgres = PythonOperator(
-    #    task_id='upload_to_postgres',
-    #    python_callable = _upload_to_postgres,
-    #    retries=4,
-    #    retry_delay=timedelta(minutes=3),
-#
-    #)
+    
+    send_email = PythonOperator(
+     task_id = 'send_emial',
+     python_callable = prepare_message,
+     provide_context = True,
+     
+    )
 
-    #copy_csv_to_table = PythonOperator(
-    #    task_id='copy_csv_to_table',
-    #    python_callable=copy_csv_to_table
-    #    
-    #)
-    #copy_csv_to_table = PythonOperator(
-    #    task_id='copy_csv_to_table',
-    #    python_callable=copy_csv_to_table
-    #    
-    #)
-    #write_df_to_postgres = PythonOperator(
-    #    task_id='write_df_to_postgres',
-    #    python_callable=write_df_to_postgres,
-    #    retries=1,
-    #    retry_delay=timedelta(seconds=15))
-    
 
-    #scan_finwiz = PythonOperator(
-#
-    #    task_id = "scan_finwiz",
-    #    python_callable = _scan_finwiz
-    #)
+
     
-    
-    create_db_tables_task>>prepare_set_of_results >> [add_first_price_validation_data, add_last_price_validation_data]>>[execute_add_first_price_validation_data, execute_add_last_price_validation_data]
+    #prepare_set_of_results_task>>create_db_tables_task_task
+    create_db_tables_task_task>>prepare_set_of_results_task
+    prepare_set_of_results_task >> [add_first_price_validation_data_task, add_last_price_validation_data_task]
+    add_first_price_validation_data_task >>execute_add_first_price_validation_data_task
+    add_last_price_validation_data_task>>  execute_add_last_price_validation_data_task
     #prepare_set_of_results
+    [execute_add_last_price_validation_data_task,execute_add_first_price_validation_data_task] >> send_email

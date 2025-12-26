@@ -11,19 +11,19 @@
 
         upload_data_to_postgres()
 
-#offseted_days, offset_dt_string = get_offsetted_days(date = now,weekdays=(1,2,5,6), offset_param=9)
+#offseted_day, offset_dt_string = get_offsetted_day(date = now,weekday=(1,2,5,6), offset_param=9)
 #
 #print(offset_dt_string)
 #
-#last_days_df = full_df[full_df["Full_date"]>= offset_dt_string]
+#last_day_df = full_df[full_df["Full_date"]>= offset_dt_string]
 #
 #
 #
 #
-#last_days_df = pd.pivot_table(last_days_df, values=['Volume_mean', 'Price_mean'], index=['Ticker'], columns=['Full_date'])
+#last_day_df = pd.pivot_table(last_day_df, values=['Volume_mean', 'Price_mean'], index=['Ticker'], columns=['Full_date'])
 #
-#last_days_df.columns = last_days_df.columns.map('{0[0]}|{0[1]}'.format)
-#last_days_df.reset_index(inplace = True)
+#last_day_df.columns = last_day_df.columns.map('{0[0]}|{0[1]}'.format)
+#last_day_df.reset_index(inplace = True)
 #
 #grouped_by_ticker = full_df[['Ticker', 'Volume']].groupby('Ticker').agg(['mean',std])
 #grouped_by_ticker.reset_index(inplace = True)
@@ -31,20 +31,20 @@
 #grouped_by_ticker.columns = grouped_by_ticker.columns.get_level_values(0)
 #grouped_by_ticker.columns = ['Ticker', 'Mean', 'St_dev']
 ##declining_df_pv
-#last_days_df = last_days_df.merge(grouped_by_ticker, how = 'left')
+#last_day_df = last_day_df.merge(grouped_by_ticker, how = 'left')
 #
-#print(last_days_df)
-#print(last_days_df.columns)
+#print(last_day_df)
+#print(last_day_df.columns)
 #
 #last_df = add_column_based_on_confition(DataFrame=last_df, new_colname="average_volume_declining", condition_column="Ticker"\
-#                                        , condition="isin", function=get_average_volume(DataFrame=last_days_df,parameter = 0.8))
+#                                        , condition="isin", function=get_average_volume(DataFrame=last_day_df,parameter = 0.8))
 #
 #last_df = add_column_based_on_confition(DataFrame=last_df, new_colname="average_volume_price_declining", condition_column="Ticker"\
-#                                        , condition="isin", function=get_declining_volume_price(DataFrame=last_days_df))
+#                                        , condition="isin", function=get_declining_volume_price(DataFrame=last_day_df))
 #
 #last_df = add_column_based_on_confition(DataFrame=last_df, new_colname="average_volume_price_rising", condition_column="Ticker"\
-#                                        , condition="isin", function=get_raising_volume_price(DataFrame=last_days_df))
+#                                        , condition="isin", function=get_raising_volume_price(DataFrame=last_day_df))
 #
 #last_df = add_column_based_on_confition(DataFrame=last_df, new_colname="average_volume_declining", condition_column="Ticker"\
-#                                        , condition="isin", function=get_declining_volume(DataFrame=last_days_df))
+#                                        , condition="isin", function=get_declining_volume(DataFrame=last_day_df))
 #

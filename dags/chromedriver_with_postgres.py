@@ -84,7 +84,7 @@ def _scan_finwiz(ti):
 
 
 
-with DAG(dag_id = "chromedriver_with_postgres", start_date=datetime.datetime(2021, 1, 1), schedule="@daily", catchup = False) as dag:
+with DAG(dag_id = "chromedriver_with_postgres", start_date=datetime.datetime(2025, 1, 1), schedule="30 22 * * 1-5", catchup = False) as dag:
 
    #get_webdriver_options = PythonOperator(
 
@@ -125,8 +125,8 @@ with DAG(dag_id = "chromedriver_with_postgres", start_date=datetime.datetime(202
     upload_data_to_postgres_loop = PythonOperator(
         task_id='upload_data_to_postgres_loop',
         python_callable = _upload_data_to_postgres,
-        retries=4,
-        retry_delay=timedelta(minutes=3),
+        retries=2,
+        retry_delay=timedelta(minutes=2),
 
     )
 

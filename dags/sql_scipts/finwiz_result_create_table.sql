@@ -24,5 +24,5 @@ CREATE TABLE if not exists finviz_result(
     price_std_all numeric(38,8),
     z_score numeric(38,8),
     z_score_price numeric(38,8)
-)PARTITION BY RANGE (full_date);
+)
 

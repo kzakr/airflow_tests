@@ -15,9 +15,6 @@ def get_time():
 
     return now, dt_string_with_hour, dt_string
 
-    files=[];
-    files  = [os.path.join(path,i) for i in os.listdir(path) if i.startswith(lookup_pattern) ]
-    return files
 
 def convert_str_values_to_dec(DataFrame:pd.DataFrame ,columns:[str]):
     for column in columns:
@@ -78,13 +75,13 @@ def get_last_file(DataFrame: pd.DataFrame, time_date:str) -> pd.DataFrame:
 
 
 
-def get_offsetted_days(date:datetime, weekdays: tuple, offset_param:int) -> datetime:
+def get_offsetted_day(date:datetime, weekday: tuple, offset_param:int) -> datetime:
 
 
-    if date.weekday in weekdays:
-        offsetted_date = date - timedelta(days=offset_param+2)
+    if date.weekday in weekday:
+        offsetted_date = date - timedelta(day=offset_param+2)
     else:
-        offsetted_date = date - timedelta(days=offset_param)
+        offsetted_date = date - timedelta(day=offset_param)
 
     dt_string = offsetted_date.strftime("%Y%m%d")
 
@@ -136,8 +133,10 @@ def add_column_based_on_confition(DataFrame: pd.DataFrame, new_colname:str, cond
 
 
 
-def list_in_directory(path:str, lookup_pattern: str)->[str]:
-    pass
+def list_in_directory(path:str, lookup_pattern: str):
+    files = [path + "/"+file for file in os.listdir(path) if file.startswith(lookup_pattern)]
+    
+    return files
 
 
 def types_mapper():
