@@ -1,32 +1,19 @@
 import numpy as np
 import pandas as pd
-import os
 import re
 from typing import Optional
 
 
 #from attr import CommonAttributes, CommonConditions
-from py_files.commons import get_time, list_in_directory, convert_str_values_to_dec,split_dates_finwiz, create_grouped_df, add_column_based_on_confition
-from py_files.calculations import std,calc_z_score, convert_big_numbers
-from py_files.postgres_bulk import postgres_bulk, sql_to_dataframe, create_engine, create_connection
-from py_files.d2d_rules import volume_and_price_declining_3, volume_below_08_average,volume_and_price_raising_3, volume_declining_3, volume_declining_with_multiplicator, volume_price_declining_2, price_declining_3
-import re
-from typing import List
+from py_files.commons import get_time, add_working_days
+from py_files.commons_sql import get_max_date
+
 from py_files.attr import  JoinOperators
 
 _NUM_OD_DAYS = 4
+now, dt_string_with_hour, dt_string = get_time()
 
-def get_max_date( time_column:str = "full_date", table:str = "finviz_result")->str:
-    statement = f"select max({time_column}) from {table}"
-
-    return (statement)
-
-
-def get_day_part(how_many_day:int = _NUM_OD_DAYS ):
-    _day_part = f"select distinct full_date from finviz_result where full_date not in (select max(full_date) from finviz_result ) order by full_date desc limit {how_many_day}"
-    return _day_part
-
-def get_raw_data(day = get_day_part()) -> str:
+def get_raw_data(day) -> str:
     
     columns_to_keep = ['no_', 'ticker', 'company', 'sector', 'industry',
            'country', 'market', 'p_e', 'price', 'change_', 'volume','full_date', 'full_date_ticker', 'time_', 
@@ -34,61 +21,76 @@ def get_raw_data(day = get_day_part()) -> str:
 
     sql_query = "select ticker, full_date, avg(price) as price, avg(cast (market as decimal)) as market, avg(volume) as volume  from finviz_result \n"
     sql_query += "where  \n"
-    sql_query += f" full_date in ({day}) \n"
+    sql_query += f" full_date in ({day})  \n"
     sql_query += "group by ticker, full_date \n"
     sql_query += "having avg(cast (market as decimal)) > 2000000" 
 
-    print(sql_query)
 
     #df =  sql_to_dataframe( query=sql_query, conn= create_connection())
 
     return sql_query
 
-def get_statistical_metrics_avg() -> str:
+def get_statistical_metrics_avg(ticker_conditions= [], to_date:int = 20251231) -> str:
 
-    sql_query_avg = "select ticker,  avg(volume) as avg_volume, avg(price) as avg_price,count(distinct full_date) as full_date_count, "
-    sql_query_avg += "sum(power(price - avg(price),2))/count(distinct full_date) as std_price, sum(power(volume - avg(volume),2))/count(distinct full_date) as std_volume\n"
+    interval_start = add_working_days(date_as_int = to_date,num_days = -70)
+
+
+    sql_query_avg = "select ticker,  avg(volume) as avg_volume, avg(price) as avg_price,count(*) as full_date_count "
     sql_query_avg += " from finviz_result  \n"
     #sql_query_avg += "where company  not like  \"ETF%\" \n"
+    sql_query_avg += f"where full_date> {interval_start} and full_date < {to_date}\n"
+    if ticker_conditions:
+        sql_query_avg += f"and ticker in {ticker_conditions}\n".replace("[", "(").replace("]", ")")
     sql_query_avg += "group by ticker \n"
     sql_query_avg += "having avg(cast (market as decimal))>1500000 \n"
     sql_query_avg += "and avg(volume)<>0 and avg(price)<>0 \n"
-    print(sql_query_avg)
     #df_avg =  sql_to_dataframe( query=sql_query_avg, conn= create_connection())
     return sql_query_avg
 
 
-def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_metrics_avg()) -> str:
+def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_metrics_avg(), ticker_conditions =[], to_date:int = 20251231) -> str:
 
-    sql_query_std = "select ticker, sum(std_price_unsum) as std_price, sum(std_volume_unsum) as std_volume from \n"
+    
+    interval_start = add_working_days(date_as_int = to_date, num_days =  -70)
+
+    sql_query_std = "select ticker, sqrt(sum(std_price_unsum)) as std_price, sqrt(sum(std_volume_unsum)) as std_volume from \n"
     sql_query_std += "\t(select fr.ticker, fr.full_date, power(price - avg_price,2)/full_date_count as std_price_unsum, power(volume - avg_volume,2)/full_date_count as std_volume_unsum "
     sql_query_std += f"\tfrom finviz_result fr join ({statistical_metrics_avg}) avg\n"
-    sql_query_std += "\t on fr.ticker = avg.ticker)"
+    sql_query_std += f"\t on fr.ticker = avg.ticker where fr.full_date > {interval_start} and fr.full_date < {to_date})\n"
+    sql_query_std += f"where full_date> {interval_start} and full_date < {to_date}\n"
+    if ticker_conditions:
+        sql_query_std += f"and ticker in {ticker_conditions}\n".replace("[", "(").replace("]", ")")
+    sql_query_std += "group by ticker"
     
-    print(sql_query_std)
     #df_avg =  sql_to_dataframe( query=sql_query_avg, conn= create_connection())
     return sql_query_std
 
-def get_data(sql_query: str = get_raw_data(), statistical_metrics_avg: str = get_statistical_metrics_avg(), statistical_metrics_std: str = get_statistical_metrics_std()) -> str:
+def get_data(sql_query: str, statistical_metrics_avg: str = get_statistical_metrics_avg(), statistical_metrics_std: str = get_statistical_metrics_std()) -> str:
     
     query =  "select sql_query.*, statistical_metrics_avg.avg_volume, statistical_metrics_avg.avg_price, statistical_metrics_avg.full_date_count, statistical_metrics_std.std_price, statistical_metrics_std.std_volume from ((" + sql_query + ") sql_query join \n"
     query += "(" + statistical_metrics_avg + ") statistical_metrics_avg \n"
-    query += "on sql_query.ticker = statistical_metrics_avg.ticker) join "
+    query += "on sql_query.ticker = statistical_metrics_avg.ticker join "
     query += "(" + statistical_metrics_std + ") statistical_metrics_std \n"
     query += "on sql_query.ticker = statistical_metrics_std.ticker) "
-    query += "where statistical_metrics.avg_volume <>0 and statistical_metrics.avg_price <>0"
+    query += "where statistical_metrics_avg.avg_volume <>0 and statistical_metrics_avg.avg_price <>0"
     
-
-    print(query)
 
     return query
 
-def get_lagged_data(query_data: str = get_data(),day_count = get_day_part()):
+def get_lagged_data(query_data: str,day_count:str):
 
     day_count = int(re.findall("(?<=limit ).*", day_count)[0])
     day_dict = {1:"one", 2:"two", 3:"three", 4:"four", 5:"five", 6:"six", 7:"seven", 8:"eight", 9:"nine", 10:"ten", 11:"eleven", 
-                12:"twelve", 13:"thirteen", 14:"fourteen", 15:"fiveteen", 16:"sixteen", 17:"seveteen", 18:"eighteen", 19:"nineteen", 20:"twenty", 21:"twenty_one", 
-                22:"twenty_two", 23:"twenty_three", 24:"twenty_four", 25:"twenty_five", 26:"twenty_six"}
+        12:"twelve", 13:"thirteen", 14:"fourteen", 15:"fiveteen", 16:"sixteen", 17:"seveteen", 18:"eighteen", 19:"nineteen", 20:"twenty", 21:"twenty_one", 
+        22:"twenty_two", 23:"twenty_three", 24:"twenty_four", 25:"twenty_five", 26:"twenty_six", 27:"twenty_seven"
+        , 28:"twenty_eight", 29:"twenty_nine", 30:"thirty", 31:"thirty_one", 32:"thirty_two", 33:"thirty_three", 34:"thirty_four"
+        , 35:"thirty_five", 36:"thirty_six", 37:"thirty_seven", 38:"thirty_eight", 39:"thirty_nine", 40:"forty", 41:"forty_one"
+        , 42:"forty_two", 43:"forty_three", 44:"forty_four", 45:"forty_five", 46:"forty_six", 47:"forty_seven", 48:"forty_eight"
+        , 49:"forty_nine", 50:"fifty", 51:"fifty_one", 52:"fifty_two", 53:"fifty_three", 54:"fifty_four", 55:"fifty_five", 56:"fifty_six", 57:"fifty_seven", 58:"fifty_eight"
+        , 59:"fifty_nine", 60:"sixty", 61:"sixty_one", 62:"sixty_two", 63:"sixty_three", 64:"sixty_four", 65:"sixty_five", 66:"sixty_six", 67:"sixty_seven", 68:"sixty_eight"
+        , 69:"sixty_nine",
+         70:"seventy", 71:"seventy_one", 72:"seventy_two", 73:"seventy_three", 74:"seventy_four", 75:"seventy_five", 76:"seventy_six", 77:"seventy_seven", 78:"seventy_eight"
+        , 79:"seventy_nine"}
     query_lag = "with a as ( \n"
     query_lag += f"\t {query_data}" 
     query_lag +=")\n"
@@ -102,8 +104,6 @@ def get_lagged_data(query_data: str = get_data(),day_count = get_day_part()):
             query_lag += f" lag (price,{day}) OVER (PARTITION BY ticker ORDER BY full_date) AS price_{day_dict[day]}_day_back  \n"
     query_lag += " from a )  \n"
     query_lag += " select * from b where full_date = (select max(full_date) from a)"
-
-    print(query_lag)    
 
     return query_lag
     
@@ -201,7 +201,6 @@ def join_operator(target: str, source:str, columns_to_join, keys, join_operator:
         join_query += f"\n {additional_condition}"
     join_query += ";\n"
 
-    print(join_query)    
     #ToDo
 
     return join_query

@@ -1,6 +1,4 @@
-import sys
 import os
-from pathlib import Path
 
 os.chdir(os.path.dirname(os.getcwd()))
 
@@ -8,22 +6,10 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
-print("dsadsa")
 from airflow.operators.bash import BashOperator
 import datetime
 from datetime import timedelta
-import psycopg2
-from py_files.get import ChromebrowserOption, OpenChromeBrowser, StockResults
-#from sql_scipts import finwiz_result_create_table
-import pandas as pd
-import logging
-from psycopg2 import sql
-from py_files.postgres_bulk import psql_insert_copy
-from sqlalchemy import create_engine
-import time
-from py_files.analyze_results import upload_data_to_postgres
-from py_files.get_postgres_data import sql_to_dataframe
-from typing import List
+
 
 #def _get_data_postgres():
 #    connection = create_connection_for_import()

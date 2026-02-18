@@ -1,18 +1,17 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
-from airflow.operators.bash import BashOperator
+
 import datetime
 from datetime import timedelta
-from py_files.get_d2d_indicators import get_raw_data, get_statistical_metrics_avg, get_statistical_metrics_std, get_lagged_data, get_data, get_last_price, get_first_price, join_operator, sql_merge_operator
-from py_files.d2d_rules import volume_and_price_declining_3, volume_below_08_average,volume_and_price_raising_3, volume_declining_3, \
-    volume_declining_with_multiplicator, volume_price_declining_2, price_declining_3, sql_volume_and_price_declining_3, \
-    sql_price_declining_3, sql_volume_and_price_raising_3, sql_volume_below_08_average, sql_volume_declining_3, sql_volume_declining_with_multiplicator, sql_volume_price_declining_2
+from py_files.get_d2d_indicators import get_lagged_data,get_last_price, get_first_price,sql_merge_operator
+from py_files.d2d_rules import sql_volume_and_price_declining_3, \
+    sql_price_declining_3, sql_volume_and_price_raising_3, sql_volume_below_08_average, sql_volume_declining_3, sql_volume_price_declining_2
 from py_files.commons import add_column_based_on_confition, types_mapper
-from py_files.attr import CommonConditions, JoinOperators
+from py_files.attr import CommonConditions
 from py_files.postgres_bulk import create_connection, sql_to_dataframe, postgres_bulk
-from airflow.operators.email_operator import EmailOperator
+
 from airflow.hooks.base_hook import BaseHook
 from py_files.commons import get_time
 from py_files.mail_operator import MessageOperator
@@ -156,7 +155,6 @@ def create_sql_script(rule :str, DataFrame):
             data_types[i] = 'int64'
         if data_types[i] == 'float':
             data_types[i] = 'float'
-    print(data_types)
     cols_and_dtypes = dict(zip(DataFrame.columns,  data_types  ))
     
     query += f"DROP TABLE IF EXISTS {rule};\n"

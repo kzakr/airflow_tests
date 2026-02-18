@@ -4,11 +4,6 @@ from pydantic import BaseModel
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from py_files.get_postgres_data import sql_to_dataframe
-
-
-
-
 
 class EmailOperator:
     def __init__(self, sender_email:str, password: str):

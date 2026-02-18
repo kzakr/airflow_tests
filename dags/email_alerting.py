@@ -1,14 +1,8 @@
 from airflow import DAG
-from jinja2 import Template
 from datetime import datetime, timedelta
 import smtplib
-from airflow.utils.email import send_email
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.email_operator import EmailOperator
 from airflow.hooks.base_hook import BaseHook
 from py_files.mail_operator import MessageOperator
-from py_files.email_templates.email_template import get_message_body
 from py_files.commons import get_time
 from py_files.email_templates.message_body import get_statistical_results
 
@@ -56,22 +50,7 @@ dag = DAG(
     catchup = False,
 )
 
-task1 = PythonOperator(
-     task_id = 'execute_python_command',
-     python_callable = prepare_message,
-     provide_context = True,
-     dag = dag
-)
 
 
 
-send_email_task = EmailOperator(
-    task_id='send_email_task',
-    to='kzakrzewski17@gmail.com',
-    subject='Airflow Email Example',
-    html_content='<p>This is the body of the email.</p>',
-    dag=dag,
-    # Specify the connection ID created in Admin > Connections
-    conn_id='smtp_default',  # Replace with your connection ID
-)
 

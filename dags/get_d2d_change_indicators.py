@@ -1,0 +1,143 @@
+import numpy as np
+import pandas as pd
+from typing import Optional
+
+
+#from attr import CommonAttributes, CommonConditions
+from py_files.commons import get_time, add_working_days, iterative_list, day_dict
+
+from typing import List
+
+
+_NUM_OD_DAYS = 4
+now, dt_string_with_hour, dt_string = get_time()
+
+def get_raw_data_change(days_back: int) -> str:
+    interval_start = add_working_days(num_days = -days_back)
+
+    sql_query = "select ticker, full_date, price, volume as volume, time_ from finviz_result \n"
+    sql_query += "where  \n"
+    sql_query += f" full_date > ({interval_start})  \n"
+
+
+
+    #df =  sql_to_dataframe( query=sql_query, conn= create_connection())
+
+    return sql_query
+
+
+def get_closed_price(source:str, partition_list:str = ["ticker", "full_date"], order_by:str= "time_"):
+    partition_list = ', '.join(partition_list)
+    sql_query = f"select * from (\n\tselect *,  ROW_NUMBER() over (PARTITION BY {partition_list} order by {order_by} desc) rn \nfrom( \n\t{source}\n)\n)\nwhere rn = 1"
+    return sql_query
+
+def get_avg_value(source:str, measure_values: str, measure_names: str):
+    if isinstance(measure_values, str):
+        measure_values = [measure_values]
+    if isinstance(measure_names, str):
+        measure_names = [measure_names]
+    sql_query = "select "
+    measure_names_listed = ""
+    measure_values_listed = ""
+    for measure_name in measure_names:
+        measure_names_listed += f"\n\t{measure_name} as {measure_name}, "
+    for measure_value in measure_values:
+        if measure_name != measure_values[-1]:
+            measure_values_listed += f"\n\tavg({measure_value}) as {measure_value} "
+        elif measure_name == measure_values[-1]:
+            measure_values_listed += f"\n\tavg({measure_value}) as {measure_value}"
+
+    sql_query += measure_names_listed
+    sql_query += measure_values_listed
+    sql_query += f"from \n(\n\t{source}\n)"
+    sql_query += "group by "
+    sql_query += ", ".join(measure_names)
+    
+    return sql_query
+
+def get_lagged_values(source:str, lags:int, lagged_column:str):
+    if lags<1:
+        print("Cannot be less than 1 lag")
+    if isinstance(lagged_column, str):
+        lagged_column = [lagged_column]
+    sql_query = "select *" 
+    for column in lagged_column:
+        for i in range(1, lags):
+            sql_query += f"\n\t, lag({column}, {i}) OVER (PARTITION BY ticker ORDER BY full_date) AS {column}_{day_dict[i]}_day_back"
+    
+    sql_query += f"\nfrom ( \n\t{source}\n) \n"
+    return sql_query
+
+
+def get_changing_pattern(source:str, lags:int, lagged_column:str, sign: str = ">", prefix:str=""):
+    if lags<1:
+        print("Cannot be less than 1 lag")
+    try:
+        lagged_column.remove("full_date")
+    except Exception as ex:
+        print(ex)
+    sql_query = f"select ticker as {prefix}ticker, full_date as {prefix}full_date, "
+    sql_query += "\nCOALESCE ("
+    for lag in reversed(range(1, lags)):
+        sql_query += f"\n\tfull_date_{day_dict[lag]}_day_back,"
+    sql_query = sql_query[:-1]
+    sql_query += f"\n) as {prefix}start_date"
+    sql_query += ", CASE WHEN"
+    lists_to_iterate = iterative_list(range_from=1, range_to= lags)
+    for iterated_list in  lists_to_iterate:
+        min_iterated_list = min(iterated_list)
+        max_iterated_list = max(iterated_list)-1
+        for column in  lagged_column:
+            for lag in range(min_iterated_list,max_iterated_list):
+                if lag == min_iterated_list:
+                    sql_query += f"(\n\t{column} {sign} {column}_{day_dict[lag]}_day_back  AND "
+                if lag +1 < max_iterated_list:
+                    if lag>=min_iterated_list:
+                        sql_query += f"\n\t{column}_{day_dict[lag]}_day_back {sign} {column}_{day_dict[lag+1]}_day_back "
+                    sql_query += " AND "
+                elif lag +1 == max_iterated_list:
+                    sql_query += f"\n\t{column}_{day_dict[lag]}_day_back {sign} {column}_{day_dict[lag+1]}_day_back ) then  full_date_{day_dict[max_iterated_list]}_day_back\n"
+                if lag +2< lags and lag +1 == max_iterated_list:
+                    sql_query += " when  " 
+    sql_query += f"\n end as {prefix}days_back"
+    
+    sql_query += f"\nfrom ( \n\t{source}\n)"
+    sql_query += "\nwhere "
+    
+    for iterated_list in  lists_to_iterate:
+        min_iterated_list = min(iterated_list)
+        max_iterated_list = max(iterated_list)-1
+
+        for column in  lagged_column:
+            for lag in range(min_iterated_list,max_iterated_list):
+                if lag == min_iterated_list:
+                    sql_query += f"(\n\t{column} {sign} {column}_{day_dict[lag]}_day_back  AND "
+                if lag +1 < max_iterated_list:
+                    if lag>=min_iterated_list:
+                        sql_query += f"\n\t{column}_{day_dict[lag]}_day_back {sign} {column}_{day_dict[lag+1]}_day_back "
+                    sql_query += " AND "
+                elif lag +1 == max_iterated_list:
+                    sql_query += f"\n\t{column}_{day_dict[lag]}_day_back {sign} {column}_{day_dict[lag+1]}_day_back )\n"
+                if lag +2< lags and lag +1 == max_iterated_list:
+                    sql_query += " or " 
+                
+    return sql_query
+
+
+def prepare_full_query(source_1: str, source_2: str, join_columns: List[str], prefix:str=None):
+    if isinstance(join_columns, str):
+        join_columns = [join_columns]
+    sql_query = "with aa as ("
+    sql_query += f"\n\t{source_1}"
+    sql_query += "\n)"
+    sql_query += ", bb as ("
+    sql_query += f"\n\t{source_2}"
+    sql_query += "\n)"
+    sql_query += f"\nselect aa.*, bb.* from aa join bb on "
+    for join_column in join_columns:
+        if join_column!=join_columns[-1]:
+            sql_query += f"\n aa.{join_column}=bb.{prefix}{join_column} AND"
+        elif join_column==join_columns[-1]:
+            sql_query += f"\n aa.{join_column}=bb.{prefix}{join_column}"
+    return sql_query
+

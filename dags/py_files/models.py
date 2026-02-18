@@ -37,6 +37,27 @@ def ct_model(X_train, X_test, y_train, y_test):
     #print(confusion_matrix(y_test, clf.predict(X_test)))
     return clf
 
+def svm_model(X_train, X_test, y_train, y_test):
+    from sklearn.svm import LinearSVC
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.pipeline import make_pipeline
 
+    svm =  LinearSVC(random_state=0,penalty = 'l1',loss='squared_hinge', dual=False, tol=1e-3,C =2)
+    svm.fit(X_train, y_train)
 
+    print("SVM Score: ", svm.score(X_test, y_test) )
+    print("*"*23)
+
+    return svm
+
+def gbc_model(X_train, X_test, y_train, y_test):
+    from sklearn.ensemble import GradientBoostingClassifier
+
+    gbc = GradientBoostingClassifier( max_depth=7)
+    gbc.fit(X_train,y_train)
+
+    print("Gradient Boost Score: ", gbc.score(X_test, y_test) )
+    print("*"*23)
+
+    return gbc
 
