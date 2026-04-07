@@ -18,3 +18,4 @@
     avg_full_date INT, 
     avg_days_back INT
   );
+

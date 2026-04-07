@@ -9,6 +9,7 @@ from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators.bash import BashOperator
 import datetime
 from datetime import timedelta
+from py_files.analyze_results import upload_data_to_postgres
 
 
 #def _get_data_postgres():

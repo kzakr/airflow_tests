@@ -2,11 +2,11 @@ drop view if exists ml_temp_validate;
 create view ml_temp_validate as select * from (with a as ( 
 	 select sql_query.*, statistical_metrics_avg.avg_volume, statistical_metrics_avg.avg_price, statistical_metrics_avg.full_date_count, statistical_metrics_std.std_price, statistical_metrics_std.std_volume from ((select ticker, full_date, avg(price) as price, avg(cast (market as decimal)) as market, avg(volume) as volume  from finviz_result 
 where  
- full_date in (select distinct full_date from finviz_result where full_date not in (select distinct full_date from finviz_result where full_date > 20260217) order by full_date desc limit 55)  
+ full_date in (select distinct full_date from finviz_result where full_date not in (select distinct full_date from finviz_result where full_date > 20260406) order by full_date desc limit 55)  
 group by ticker, full_date 
 having avg(cast (market as decimal)) > 2000000) sql_query join 
 (select ticker,  avg(volume) as avg_volume, avg(price) as avg_price,count(*) as full_date_count  from finviz_result  
-where full_date> 20251028 and full_date < 20260203
+where full_date> 20251215 and full_date < 20260323
 group by ticker 
 having avg(cast (market as decimal))>1500000 
 and avg(volume)<>0 and avg(price)<>0 
@@ -18,8 +18,8 @@ group by ticker
 having avg(cast (market as decimal))>1500000 
 and avg(volume)<>0 and avg(price)<>0 
 ) avg
-	 on fr.ticker = avg.ticker where fr.full_date > 20251028 and fr.full_date < 20260203)
-where full_date> 20251028 and full_date < 20260203
+	 on fr.ticker = avg.ticker where fr.full_date > 20251215 and fr.full_date < 20260323)
+where full_date> 20251215 and full_date < 20260323
 group by ticker) statistical_metrics_std 
 on sql_query.ticker = statistical_metrics_std.ticker) where statistical_metrics_avg.avg_volume <>0 and statistical_metrics_avg.avg_price <>0)
 , b as ( select *, 

@@ -1,36 +1,29 @@
-import smtplib
+from pathlib import Path
+
+# Print the module name
+print(f"Module name: {__name__}")
+
+# Convert the module name to a Path object
+module_path = Path(__name__)
+
+# Print the Path object created from module name
+print(f"Module Path: {module_path}")
 
 
+# Get the path of the current script
+script_path = Path(__file__)
 
+# Print the script's path
+print(f"Script path: {script_path}")
 
-class Gmail(object):
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
-        self.server = 'smtp.gmail.com'
-        self.port = 587
-        session = smtplib.SMTP(self.server, self.port)        
-        session.ehlo()
-        session.starttls()
-        session.ehlo
-        session.login(self.email, self.password)
-        self.session = session
+# Get the directory of the current script
+script_dir = script_path.parent
 
-    def send_message(self, subject, body):
-        ''' This must be removed '''
-        headers = [
-            "From: " + self.email,
-            "Subject: " + subject,
-            "To: " + self.email,
-            "MIME-Version: 1.0",
-           "Content-Type: text/html"]
-        headers = "\r\n".join(headers)
-        self.session.sendmail(
-            self.email,
-            self.email,
-            headers + "\r\n\r\n" + body)
+# Print the script's directory
+print(f"Script directory: {script_dir}")
 
+# Example of accessing a file in the same directory
+data_file = script_dir / 'data.txt'
 
-gm = Gmail(YOUR_GOOGLE_EMAIL, YOUR_GOOGLE_EMAIL_APP_PASSWORD)
-
-gm.send_message('Subject', 'Message')
+# Print the path to the data file
+print(f"Data file path: {data_file}")
