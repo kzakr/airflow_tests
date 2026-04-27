@@ -27,10 +27,10 @@ def get_statistical_results(context, template = get_message_body()):
 
     return email_content
 
-def get_statistical_results_2(template = get_message_body()):
+def get_statistical_results_2(template = get_message_body(), table: str = "statistical_results"):
 
     body=''
-    query = "select * from statistical_results"
+    query = f"select * from {table}"
     
     df = sql_to_dataframe(query=query, conn= create_connection())
         
