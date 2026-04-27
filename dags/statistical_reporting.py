@@ -30,13 +30,13 @@ def _prepare_increasing_view():
         os.remove("./dags/sql_scipts/statistical_indicators.sql")
     except Exception as ex:
         print(ex)
-    final_query = prepare_final_query(lags=16, days_back=20, lagged_column_1= ["price", "full_date"], lagged_column_2= ["volume", "full_date"], measure_values = ["volume"], measure_names = ["ticker", "full_date"], sign='>', multiplier = 1.02)
+    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["price", "full_date"], lagged_column_2= ["volume", "full_date"], measure_values = ["volume"], measure_names = ["ticker", "full_date"], sign='>', multiplier = 1.02)
     insert_to_stats(name= "tickers_increasing", sql_query=final_query)
 
 
 def _prepare_decreasing_view():
     
-    final_query = prepare_final_query(lags=12, days_back=15, lagged_column_1= ["price", "full_date"], lagged_column_2= ["volume", "full_date"], measure_values = ["volume"], measure_names = ["ticker", "full_date"], sign = '<', multiplier = 1.02)
+    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["price", "full_date"], lagged_column_2= ["volume", "full_date"], measure_values = ["volume"], measure_names = ["ticker", "full_date"], sign = '<', multiplier = 1.02)
     insert_to_stats(name= "tickers_decreasing", sql_query=final_query)
 
 

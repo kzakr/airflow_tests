@@ -27,11 +27,18 @@ default_args = {
 }
 
 now, dt_string_with_hour, dt_string = get_time()
-dates_to_train = [20251114, 20251117, 20251120,20251123, 20251130, 20251201, 20251205
-                      , 20251208 ,20251210, 20251211, 20251212, 20251216, 20251217,20251230
-                      , 20260102, 20260106, 20260107, 20260109, 20260112, 20260115, 20260116
-                      , 20260120]
+dates_to_train = [ 20251117, 20251130, 20251201, 20251205
+                      , 20251208 , 20251212, 20251217,20251230
+                      , 20260102, 20260106, 20260107, 20260109, 
+                     20260112, 20260115
+                      , 20260120, 20260218, 20260220, 20260224, 20260226, 20260227,
+                      20260303,20260305,20260310,20260311,20260313,20260323,
+                    20260325]
 _interval = 10
+
+cut_offs = [1, 1.3, 1.5,2]
+    
+cut_off_model_dict = {}
 
 def _prepare_view():
     try:
@@ -62,34 +69,46 @@ def _prepare_ds(**kwargs):
     df = pd.DataFrame()
     df_1 = pd.DataFrame()
     df_0 = pd.DataFrame()
+    
     for i in range(0,len(dates_to_train)):
-
         sql_query = ti.xcom_pull(task_ids = "get_data_from_view", key=f'sql_query_{i}')
 
-        df_tmp =  sql_to_dataframe( query=sql_query, conn= create_connection())
-        
-        df_tmp = get_zscore_difference(df_tmp, interval = _interval)
-        try:
-            df_tmp.drop(columns = ['z_score_price_sixty_nine_day_back',
-                'z_score_volume_seventy_day_back'], inplace = True)
-        except:
-            continue
-        try:
-            df_tmp.drop(columns = ['z_score_price_fourty_five_day_back',
-                'z_score_volume_fifty_five_day_back'], inplace = True)
-        except:
-            continue
-        #df.dropna(inplace = True)
-        df_tmp.fillna( -99999,inplace = True)
-        df= pd.concat([df, df_tmp.sample(1000)])
+        df_tmp_base =  sql_to_dataframe( query=sql_query, conn= create_connection())
+        for cut_off in cut_offs:
 
-        
+            df_tmp = get_zscore_difference(df_tmp_base, interval = _interval)
+            try:
+                df_tmp.drop(columns = ['z_score_price_sixty_nine_day_back',
+                    'z_score_volume_seventy_day_back'], inplace = True)
+            except:
+                print("cos")
+            try:
+                df_tmp.drop(columns = ['z_score_price_fourty_five_day_back',
+                    'z_score_volume_fifty_five_day_back'], inplace = True)
+            except:
+                print("cos")
+            #df.dropna(inplace = True)
+            df_tmp.fillna( -99999,inplace = True)
+            df_tmp = df_tmp.sample(1000)
+      
+            tickers_list = get_list_of_ticker_with_count(df_tmp, 20, z_score_diff = cut_off)
+            df_1_tmp = prepare_df_1(tickers_list, df_tmp)
+            df_0_tmp = prepare_df_0(tickers_list, df_tmp)
+            df_1 = pd.concat([df_1, df_1_tmp])
+            df_0 = pd.concat([df_0, df_0_tmp])
+            df_1.fillna( -99999,inplace = True)
+            df_0.fillna( -99999,inplace = True)
+            df= pd.concat([df, df_tmp.sample(500)])
+
+            
+            cut_off_model_dict[str(cut_off)]  = {"positive": df_1, "negative": df_0}
+
     
     #vailidate
     ############
     ti = kwargs['ti']
     sql_query_validate = ti.xcom_pull(task_ids = "get_data_validate_from_view", key='sql_query_validate')
-    print(sql_query_validate)
+
 
     df2 =  sql_to_dataframe( query=sql_query_validate, conn= create_connection())
     
@@ -98,44 +117,35 @@ def _prepare_ds(**kwargs):
         df2.drop(columns = ['z_score_price_sixty_nine_day_back',
             'z_score_volume_seventy_day_back'], inplace = True)
     except:
-        pass
+        print("cos")
     try:
         df2.drop(columns = ['z_score_price_fourty_five_day_back',
             'z_score_volume_fifty_five_day_back'], inplace = True)
     except:
-        pass
+        print("cos")
     nan_cols = [i for i in df2.columns if df2[i].isnull().any()]
-    df2
     #df2.dropna(inplace = True)
     df2.fillna( -99999,inplace = True)
     
     ############
-    
 
-    cut_offs = [0.7, 0.9, 1, 1.3, 1.5,2]
     models = {}
+
     for cut_off in cut_offs:
         
-        tickers_list = get_list_of_ticker_with_count(df_tmp, 20, z_score_diff = cut_off)
-        df_1_tmp = prepare_df_1(tickers_list, df_tmp)
-        df_0_tmp = prepare_df_0(tickers_list, df_tmp)
-        df_1 = pd.concat([df_1, df_1_tmp])
-        df_0 = pd.concat([df_0, df_0_tmp])
-        df_1.fillna( -99999,inplace = True)
-        df_0.fillna( -99999,inplace = True)
-
+        df_1 = cut_off_model_dict[str(cut_off)]["positive"]
+        df_0 = cut_off_model_dict[str(cut_off)]["negative"]
         X_train, X_test, y_train, y_test = get_data_sets(df_1, df_0)
 
         dt = dt_model(X_train, X_test, y_train, y_test)
         ct = ct_model(X_train, X_test, y_train, y_test)
         svm = svm_model(X_train, X_test, y_train, y_test)
         gbc = gbc_model(X_train, X_test, y_train, y_test)
-        print(tickers_list)
+
         df_1_t = prepare_df_1(tickers_list, df)
         df_0_t = df[df["ticker"].isin(tickers_list)==0]
         df_0_t["category"] = 0
-        print("PpPpPp"*34)
-        print("##$$"*100)
+ 
         with open("./dags/sql_scipts/df_cols.txt", "w") as file:
             for tt in df_1_t.columns.tolist():
                 file.write("\n "+ tt)
@@ -152,7 +162,7 @@ def _prepare_ds(**kwargs):
 
     tickers_list = get_list_of_ticker_with_count(df2, 15, -20)
     
-    df2 = df2.sample(200)
+    df2 = df2.sample(500)
     df2.drop(columns = [ "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
     X_full = df2
@@ -176,17 +186,19 @@ def _prepare_ds(**kwargs):
             , "gbc_pred": gbc.predict(X_full).tolist(), "svm_pred": svm.predict(X_full).tolist(),\
                "ct_pred": ct.predict(X_full).tolist() }
         temp_df= pd.DataFrame(dictionary_or_results)
+
         temp_df.reset_index(inplace=True)
         temp_df.drop(columns=["index"], inplace = True)
         tickers_to_verify.reset_index(inplace=True)
         tickers_to_verify.drop(columns=["index"], inplace = True)
+
         results_df  = pd.concat([tickers_to_verify, temp_df], axis = 1)
         results_df["difference"] = results_df["difference"].astype(float)
         results_df["suma"] = results_df["dt_pred"]+results_df["gbc_pred"]+results_df["svm_pred"]+results_df["ct_pred"]
 
         results_df.to_csv(f"/opt/airflow/dags/output_files/data_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
         cut_off = cut_off.replace(".","_")
-        results_df[results_df["suma"] == 4].to_csv(f"/opt/airflow/dags/output_files/data4_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
+        results_df[results_df["suma"]>=4].to_csv(f"/opt/airflow/dags/output_files/data4_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
 
 
 

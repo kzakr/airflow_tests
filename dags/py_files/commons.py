@@ -5,23 +5,27 @@ from datetime import datetime, timedelta
 from typing import Any
 from py_files.attr import CommonConditions
 
-def get_time():
+def get_time(format="%Y%m%d"):
 
     now = datetime.now()
 
     dt_string_with_hour = now.strftime("%Y%m%d_%H_%M")
-    dt_string = now.strftime("%Y%m%d")
+    dt_string = now.strftime(format)
 
     return now, dt_string_with_hour, dt_string
 
-def get_last_weekday():
+def get_last_weekday(format:str = "%Y%m%d"):
      
     now = datetime.now()
     if now.weekday() == 0:
         report_date = now - timedelta(days=3)
     else:
         report_date = now - timedelta(days=1)
-    return report_date.strftime("%Y%m%d")
+
+    report_date = report_date.strftime(format)
+    return report_date
+
+
 
 def quarter_back(date_as_int:int):
     if date_as_int:
@@ -32,7 +36,7 @@ def quarter_back(date_as_int:int):
     
     return report_date.strftime("%Y%m%d")
 
-def add_working_days(num_days:int, date_as_int:int= None):
+def add_working_days(num_days:int, date_as_int:int= None, format:str = "%Y%m%d"):
     if date_as_int:
         start_date = datetime.strptime(str(date_as_int), '%Y%m%d')
     else: 
@@ -45,7 +49,7 @@ def add_working_days(num_days:int, date_as_int:int= None):
         if weekday >= 5:
             continue
         my_num_days -= 1
-    return start_date.strftime("%Y%m%d")
+    return start_date.strftime(format)
 
 
 

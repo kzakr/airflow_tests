@@ -9,3 +9,5 @@ latest
 .env
 *.env
 postgres_bulk.py
+logs\*
+logs/*
