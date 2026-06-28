@@ -78,7 +78,7 @@ def get_changing_pattern(source:str, lags:int, lagged_column:str, sign: str = ">
         lagged_column.remove("full_date")
     except Exception as ex:
         print(ex)
-    sql_query = f"select ticker as {prefix}ticker, _date as {prefix}_date, "
+    sql_query = "select ticker as ticker, _date as _date, "
     #sql_query += "\nCOALESCE ("
     #for lag in reversed(range(1, lags)):
     #    sql_query += f"\n\t_date_{day_dict[lag]}_day_back,"
@@ -153,9 +153,9 @@ def prepare_full_query(source_1: str, source_2: str, join_columns: List[str], pr
     sql_query += "\nselect Current_DATE as current_date_, aa.ticker, aa._date as _date, aa.days_back, bb.* from aa join bb on "
     for join_column in join_columns:
         if join_column!=join_columns[-1]:
-            sql_query += f"\n aa.{join_column}=bb.{prefix}{join_column} AND"
+            sql_query += f"\n aa.{join_column}=bb.{join_column} AND"
         elif join_column==join_columns[-1]:
-            sql_query += f"\n aa.{join_column}=bb.{prefix}{join_column}"
+            sql_query += f"\n aa.{join_column}=bb.{join_column}"
     return sql_query
 
 

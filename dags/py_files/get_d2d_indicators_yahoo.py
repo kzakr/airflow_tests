@@ -29,7 +29,7 @@ def get_raw_data(day) -> str:
 
     return sql_query
 
-def get_statistical_metrics_avg(ticker_conditions= [], to_date:int = 20251231) -> str:
+def get_statistical_metrics_avg(ticker_conditions= [], to_date:int = 20260401) -> str:
 
     interval_start = add_working_days(date_as_int = to_date,num_days = -70, format = "%Y-%m-%d")
 
@@ -47,7 +47,7 @@ def get_statistical_metrics_avg(ticker_conditions= [], to_date:int = 20251231) -
     return sql_query_avg
 
 
-def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_metrics_avg(), ticker_conditions =[], to_date:int = 20251231) -> str:
+def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_metrics_avg(), ticker_conditions =[], to_date:int = 20260401) -> str:
 
     
     interval_start = add_working_days(date_as_int = to_date, num_days =  -70, format = "%Y-%m-%d")
