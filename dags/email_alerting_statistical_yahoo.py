@@ -70,6 +70,15 @@ dag = DAG(
     catchup = False,
 )
 
+wait_for_statistical = ExternalTaskSensor(
+    task_id='wait_for_statistical_results',
+    external_dag_id='statistical_view_yahoo',
+    external_task_id='finish_statistical_workflow',
+    timeout=86400,
+    mode='reschedule',
+    dag=dag,
+)
+
 task1 = PythonOperator(
      task_id = 'statistical_results',
      python_callable = prepare_message,
@@ -101,5 +110,5 @@ task1 = PythonOperator(
 #    timeout=2,
 #)
 
-_=task1
+wait_for_statistical >> task1
 

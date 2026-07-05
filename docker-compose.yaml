@@ -242,6 +242,16 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  external-scheduler:
+    <<: *airflow-common
+    command: >
+      bash -c "python /opt/airflow/external_scheduler.py --config /opt/airflow/external_scheduler_config.json"
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
   airflow-worker:
     <<: *airflow-common
     command: celery worker

@@ -27,13 +27,15 @@ default_args = {
 }
 
 now, dt_string_with_hour, dt_string = get_time()
-dates_to_train = [ 20251117, 20251130, 20251201, 20251205
-                      , 20251208 , 20251212, 20251217,20251230
-                      , 20260102, 20260106, 20260107, 20260109, 
-                     20260112, 20260115
-                      , 20260120, 20260218, 20260220, 20260224, 20260226, 20260227,
-                      20260303,20260305,20260310,20260311,20260313,20260323,
-                    20260325]
+dates_to_train = [ #20251117, 20251130, 20251201, 20251205
+                    #  , 20251208 , 20251212, 20251217,20251230
+                   #   , 20260102, 20260106, 20260107, 20260109, 
+                   #  20260112,
+                    20260115
+                      , 20260120, 20260218, 20260220, #20260227,
+                     # 20260303,20260305,20260310,
+                      20260311,20260313,20260323,
+                    20260325,20260425,20260515, 20260510]
 _interval = 10
 
 cut_offs = [1, 1.3, 1.5,2]
@@ -162,7 +164,7 @@ def _prepare_ds(**kwargs):
 
     tickers_list = get_list_of_ticker_with_count(df2, 15, -20)
     
-    df2 = df2.sample(500)
+    df2 = df2.sample(300)
     df2.drop(columns = [ "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
     X_full = df2
@@ -196,9 +198,9 @@ def _prepare_ds(**kwargs):
         results_df["difference"] = results_df["difference"].astype(float)
         results_df["suma"] = results_df["dt_pred"]+results_df["gbc_pred"]+results_df["svm_pred"]+results_df["ct_pred"]
 
-        results_df.to_csv(f"/opt/airflow/dags/output_files/data_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
+        results_df.to_csv(f"/opt/airflow/dags/output_files/yahoo/data_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
         cut_off = cut_off.replace(".","_")
-        results_df[results_df["suma"]>=4].to_csv(f"/opt/airflow/dags/output_files/data4_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
+        results_df[results_df["suma"]>=2].to_csv(f"/opt/airflow/dags/output_files/yahoo/data4_to_verify_{dt_string_with_hour}__{cut_off}.csv", index = False)
 
 
 

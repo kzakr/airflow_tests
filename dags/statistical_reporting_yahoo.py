@@ -2,6 +2,8 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 
 from py_files.commons import get_time
 
@@ -29,13 +31,13 @@ def _prepare_increasing_view():
         os.remove("./dags/sql_scipts/statistical_indicators_yahoo.sql")
     except Exception as ex:
         print(ex)
-    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["close"], lagged_column_2= ["volume"], measure_values = ["volume"], measure_names = ["ticker", "_date"], sign='>', multiplier = 1)
+    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["close"], lagged_column_2= ["volume"], measure_values = ["volume"], measure_names = ["ticker", "_date", "days_back"], sign='>', multiplier = 1)
     insert_to_stats(name= "tickers_increasing_yahoo", sql_query=final_query)
 
 
 def _prepare_decreasing_view():
     
-    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["close"], lagged_column_2= ["volume",], measure_values = ["volume"], measure_names = ["ticker", "_date"], sign = '<', multiplier = 1)
+    final_query = prepare_final_query(lags=9, days_back=20, lagged_column_1= ["close"], lagged_column_2= ["volume",], measure_values = ["volume"], measure_names = ["ticker", "_date", "days_back"], sign = '<', multiplier = 1)
     insert_to_stats(name= "tickers_decreasing_yahoo", sql_query=final_query)
 
 
@@ -56,28 +58,38 @@ dag = DAG(
 )
 
 
+wait_for_upload = ExternalTaskSensor(
+        task_id='wait_for_yahoo_upload',
+        external_dag_id='yahoo_data_upload',
+        external_task_id='clean_results',
+        timeout=86400,
+        mode='reschedule',
+        dag=dag,
+    )
+
 create_tables = PostgresOperator(
         task_id='create_view_with_increasing_values',
         postgres_conn_id="airflow",
         sql='./sql_scipts/create_statistical_tables_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
+        dag=dag,
     )
 
-prepare_increasing_view = PythonOperator(
-     task_id = 'prepare_view_increasing',
-     python_callable = _prepare_increasing_view,
-     provide_context = True,
-     dag = dag
-)
-
-prepare_decreasing_view = PythonOperator(
-     task_id = 'prepare_view_decreasing',
-     python_callable = _prepare_decreasing_view,
-     provide_context = True,
-     dag = dag
-)
-
+#prepare_increasing_view = PythonOperator(
+#     task_id = 'prepare_view_increasing',
+#     python_callable = _prepare_increasing_view,
+#     provide_context = True,
+#     dag = dag
+#)
+#
+#prepare_decreasing_view = PythonOperator(
+#     task_id = 'prepare_view_decreasing',
+#     python_callable = _prepare_decreasing_view,
+#     provide_context = True,
+#     dag = dag
+#)
+#
 
 create_view_with_increasing_values_task = PostgresOperator(
         task_id='insert_values_inc',
@@ -85,6 +97,7 @@ create_view_with_increasing_values_task = PostgresOperator(
         sql='./sql_scipts/sql_query_tickers_increasing_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
+        dag=dag,
     )
 
 create_view_with_decreasing_values_task = PostgresOperator(
@@ -93,9 +106,14 @@ create_view_with_decreasing_values_task = PostgresOperator(
         sql='./sql_scipts/sql_query_tickers_decreasing_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
+        dag=dag,
     )
 
-_ = create_tables>> [prepare_decreasing_view, prepare_increasing_view] 
+finish_statistical_workflow = EmptyOperator(
+        task_id='finish_statistical_workflow',
+        dag=dag,
+    )
 
-_ =  prepare_increasing_view>> create_view_with_increasing_values_task
-_ =  prepare_decreasing_view>> create_view_with_decreasing_values_task
+wait_for_upload >> create_tables
+create_tables >> [create_view_with_increasing_values_task, create_view_with_decreasing_values_task] >> finish_statistical_workflow
+

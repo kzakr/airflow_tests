@@ -58,7 +58,7 @@ from (
 from( 
 	select ticker, full_date, price, volume as volume, time_ from finviz_result 
 where  
- full_date > (20260330)  
+ full_date > (20260504)  
 AND  ticker in 
 	(
 		select ticker from finviz_result 
@@ -167,7 +167,7 @@ from (
 (
 	select ticker, full_date, price, volume as volume, time_ from finviz_result 
 where  
- full_date > (20260330)  
+ full_date > (20260504)  
 AND  ticker in 
 	(
 		select ticker from finviz_result 

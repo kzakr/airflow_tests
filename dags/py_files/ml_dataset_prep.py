@@ -155,6 +155,51 @@ def get_data_query_validate():
 
     return query
 
+
+def get_data_query_predict():
+
+
+   
+    query = "with aa as ( \n"
+    query += "\t select * from ml_temp_predict\n"
+    query += ")"
+
+    query += ",cc as( \n"
+    query += "\t select ticker, std_price, std_volume from aa"
+    query += "\t\t where  std_price <>0 and std_volume <> 0"
+
+    query += ")\n"
+
+    
+    query += ",dd as( \n"
+    query += "\t select aa.ticker, aa.full_date, round((aa.price - aa.avg_price)/cc.std_price,3) as z_score_price, round((aa.volume - aa.avg_volume)/cc.std_volume, 3) as z_score_volume, \n"
+    for day in range(1,_num_of_days+1):
+        if day <_num_of_days:
+            query += f"\t round((aa.price_{day_dict[day]}_day_back - aa.avg_price)/cc.std_price,3) as z_score_price_{day_dict[day]}_day_back, round((aa.volume_{day_dict[day]}_day_back - aa.avg_volume)/cc.std_volume,3) as z_score_volume_{day_dict[day]}_day_back, \n"
+        elif day ==_num_of_days:
+            query += f"\t round((aa.price_{day_dict[day]}_day_back - aa.avg_price)/cc.std_price,3) as z_score_price_{day_dict[day]}_day_back, round((aa.volume_{day_dict[day]}_day_back - aa.avg_volume)/cc.std_volume,3) as z_score_volume_{day_dict[day]}_day_back \n"
+
+    query += "from aa left join cc on aa.ticker = cc.ticker"
+    query += ")\n"
+    query += ",ee as( \n"
+    query += "select *,"
+    for day in range(1,_num_of_days):
+        if day <_num_of_days-1:
+            query += f"\t  z_score_price_{day_dict[day]}_day_back - z_score_price_{day_dict[day+1]}_day_back as {day_dict[day]}_{day_dict[day+1]}_difference, \n"
+        elif day ==_num_of_days-1:
+             query += f"\t z_score_price_{day_dict[day]}_day_back - z_score_price_{day_dict[day+1]}_day_back as {day_dict[day]}_{day_dict[day+1]}_difference \n"
+
+    query +=  " from dd"
+    query += ")\n"
+    query += "select  aa.price, aa.market, aa.volume, ee.*  from aa join ee on aa.ticker = ee.ticker and aa.full_date = ee.full_date"
+    #query += "select  aa.price, aa.market, aa.volume, dd.*  from aa join dd on aa.ticker = dd.ticker and aa.full_date = dd.full_date"
+
+
+
+
+
+    return query
+
 def get_zscore_difference(df = pd.DataFrame, interval:int=_interval):
     
     if interval<2:

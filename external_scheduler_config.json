@@ -1,0 +1,32 @@
+{
+  "check_interval_seconds": 30,
+  "schedule": [
+    {
+      "dag_id": "yahoo_data_upload",
+      "hour": 22,
+      "minute": 30,
+      "days_of_week": [1, 2, 3, 4, 5],
+      "depends_on": []
+    },
+    {
+      "dag_id": "ml_reporting_yahoo",
+      "days_of_week": [1, 2, 3, 4, 5],
+      "depends_on": ["yahoo_data_upload"]
+    },
+    {
+      "dag_id": "statistical_view_yahoo",
+      "days_of_week": [1, 2, 3, 4, 5],
+      "depends_on": ["yahoo_data_upload"]
+    },
+    {
+      "dag_id": "email_distribution_statistical_yahoo",
+      "days_of_week": [1, 2, 3, 4, 5],
+      "depends_on": ["statistical_view_yahoo"]
+    },
+    {
+      "dag_id": "email_distribution_statistical_yahoo_damian",
+      "days_of_week": [1, 2, 3, 4, 5],
+      "depends_on": ["statistical_view_yahoo"]
+    }
+  ]
+}
