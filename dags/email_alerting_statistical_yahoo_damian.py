@@ -40,7 +40,7 @@ def prepare_message(**kwargs):
     session =  email_message.initialize_session()
     email_message.bulid_base_msg()
     email_message.get_sender()
-    email_message.create_recepient_list(("kzakrzewski17@gmail.com"))
+    email_message.create_recepient_list(("dzimacki@gmail.com"))
     email_message.get_subject(subject)
     email_message.get_body(get_statistical_results_2(table="statistical_results_yahoo"))
     email_message.release_message(session)

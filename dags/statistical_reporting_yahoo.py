@@ -2,6 +2,8 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 
 from py_files.commons import get_time
 
@@ -56,6 +58,15 @@ dag = DAG(
 )
 
 
+wait_for_upload = ExternalTaskSensor(
+        task_id='wait_for_yahoo_upload',
+        external_dag_id='yahoo_data_upload',
+        external_task_id='clean_results',
+        timeout=86400,
+        mode='reschedule',
+        dag=dag,
+    )
+
 create_tables = PostgresOperator(
         task_id='create_view_with_increasing_values',
         postgres_conn_id="airflow",
@@ -98,6 +109,11 @@ create_view_with_decreasing_values_task = PostgresOperator(
         dag=dag,
     )
 
-_ = create_tables>> create_view_with_decreasing_values_task 
-_= create_tables>> create_view_with_increasing_values_task
+finish_statistical_workflow = EmptyOperator(
+        task_id='finish_statistical_workflow',
+        dag=dag,
+    )
+
+wait_for_upload >> create_tables
+create_tables >> [create_view_with_increasing_values_task, create_view_with_decreasing_values_task] >> finish_statistical_workflow
 

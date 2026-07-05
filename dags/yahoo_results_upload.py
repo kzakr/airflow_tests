@@ -72,6 +72,4 @@ with DAG(dag_id = "yahoo_data_upload", start_date=datetime.datetime(2025, 1, 1),
         retry_delay=timedelta(minutes=3),
     )
 
-
-    
-    [create_db_table_task, create_db_staging_table_task] >>upload_data_to_postgres_loop >> insert_into_db_table_task >> clean_results
+    [create_db_table_task, create_db_staging_table_task] >> upload_data_to_postgres_loop >> insert_into_db_table_task >> clean_results
