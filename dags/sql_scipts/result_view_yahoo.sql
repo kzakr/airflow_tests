@@ -3,9 +3,11 @@ SELECT * FROM (
 
 WITH tickers_increasing as (
     select current_date_, ticker, _date, avg_ticker, avg_date, days_back, avg_days_back from tickers_increasing_yahoo
+    WHERE _date >= current_date_ - INTERVAL '10 days'
 )
 , tickers_decreasing as (
 select current_date_, ticker, _date, avg_ticker, avg_date, days_back, avg_days_back from tickers_decreasing_yahoo
+WHERE _date >= current_date_ - INTERVAL '10 days'
 )
 , ranked_data AS (
   SELECT *, CASE WHEN increasing_ind IS NOT NULL THEN 'WAS INCREASING' ELSE NULL END AS is_increasing_stauts, row_number() OVER (PARTITION BY ticker ORDER BY current_date_ DESC, _date DESC) AS rank

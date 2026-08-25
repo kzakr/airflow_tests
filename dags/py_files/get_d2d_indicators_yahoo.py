@@ -16,12 +16,12 @@ now, dt_string_with_hour, dt_string = get_time(format = "%Y-%m-%d")
 def get_raw_data(day) -> str:
     
     columns_to_keep = ['no_', 'ticker', 'company', 'sector', 'industry',
-           'country', 'market', 'p_e', 'price', 'change_', 'volume','full_date', 'full_date_ticker', 'time_', 
-           'volume_mean', 'volume_std', 'price_mean', 'price_std']
+           'country', 'p_e', 'close', 'change_', 'volume','_date', '_date_ticker', 'time_', 
+           'volume_mean', 'volume_std', 'close_mean', 'close_std']
 
-    sql_query = "select ticker, _date, close as price,  volume as volume  from yahoo_result \n"
+    sql_query = "select ticker, _date, close as close,  volume as volume  from yahoo_result \n"
     sql_query += "where  \n"
-    sql_query += f" full_date in ({day})  \n"
+    sql_query += f" _date in ({day})  \n"
 
 
 
@@ -32,17 +32,16 @@ def get_raw_data(day) -> str:
 def get_statistical_metrics_avg(ticker_conditions= [], to_date:int = 20260401) -> str:
 
     interval_start = add_working_days(date_as_int = to_date,num_days = -70, format = "%Y-%m-%d")
+    to_date = add_working_days(date_as_int = to_date,num_days = 0, format = "%Y-%m-%d")
 
-
-    sql_query_avg = "select ticker,  avg(volume) as avg_volume, avg(price) as avg_price,count(*) as full_date_count "
+    sql_query_avg = "select ticker,  avg(volume) as avg_volume, avg(close) as avg_close,count(*) as _date_count "
     sql_query_avg += " from yahoo_result  \n"
     #sql_query_avg += "where company  not like  \"ETF%\" \n"
-    sql_query_avg += f"where _date> {interval_start} and _date < {to_date}\n"
+    sql_query_avg += f"where _date> '{interval_start}' and _date < '{to_date}'\n"
     if ticker_conditions:
         sql_query_avg += f"and ticker in {ticker_conditions}\n".replace("[", "(").replace("]", ")")
     sql_query_avg += "group by ticker \n"
-    sql_query_avg += "having avg(cast (market as decimal))>1500000 \n"
-    sql_query_avg += "and avg(volume)<>0 and avg(price)<>0 \n"
+    sql_query_avg += "having avg(volume)<>0 and avg(close)<>0 \n"
     #df_avg =  sql_to_dataframe( query=sql_query_avg, conn= create_connection())
     return sql_query_avg
 
@@ -52,11 +51,13 @@ def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_m
     
     interval_start = add_working_days(date_as_int = to_date, num_days =  -70, format = "%Y-%m-%d")
 
-    sql_query_std = "select ticker, sqrt(sum(std_price_unsum)) as std_price, sqrt(sum(std_volume_unsum)) as std_volume from \n"
-    sql_query_std += "\t(select fr.ticker, fr._date, power(price - avg_price,2)/full_date_count as std_price_unsum, power(volume - avg_volume,2)/full_date_count as std_volume_unsum "
+    to_date = add_working_days(date_as_int = to_date,num_days = 0, format = "%Y-%m-%d")
+
+    sql_query_std = "select ticker, sqrt(sum(std_close_unsum)) as std_close, sqrt(sum(std_volume_unsum)) as std_volume from \n"
+    sql_query_std += "\t(select fr.ticker, fr._date, power(close - avg_close,2)/_date_count as std_close_unsum, power(volume - avg_volume,2)/_date_count as std_volume_unsum "
     sql_query_std += f"\tfrom yahoo_result fr join ({statistical_metrics_avg}) avg\n"
-    sql_query_std += f"\t on fr.ticker = avg.ticker where fr._date > {interval_start} and fr._date < {to_date})\n"
-    sql_query_std += f"where _date> {interval_start} and _date < {to_date}\n"
+    sql_query_std += f"\t on fr.ticker = avg.ticker where fr._date > '{interval_start}' and fr._date < '{to_date}')\n"
+    sql_query_std += f"where _date> '{interval_start}' and _date < '{to_date}'\n"
     if ticker_conditions:
         sql_query_std += f"and ticker in {ticker_conditions}\n".replace("[", "(").replace("]", ")")
     sql_query_std += "group by ticker"
@@ -66,12 +67,12 @@ def get_statistical_metrics_std(statistical_metrics_avg: str = get_statistical_m
 
 def get_data(sql_query: str, statistical_metrics_avg: str = get_statistical_metrics_avg(), statistical_metrics_std: str = get_statistical_metrics_std()) -> str:
     
-    query =  "select sql_query.*, statistical_metrics_avg.avg_volume, statistical_metrics_avg.avg_price, statistical_metrics_avg.full_date_count, statistical_metrics_std.std_price, statistical_metrics_std.std_volume from ((" + sql_query + ") sql_query join \n"
+    query =  "select sql_query.*, statistical_metrics_avg.avg_volume, statistical_metrics_avg.avg_close, statistical_metrics_avg._date_count, statistical_metrics_std.std_close, statistical_metrics_std.std_volume from ((" + sql_query + ") sql_query join \n"
     query += "(" + statistical_metrics_avg + ") statistical_metrics_avg \n"
     query += "on sql_query.ticker = statistical_metrics_avg.ticker join "
     query += "(" + statistical_metrics_std + ") statistical_metrics_std \n"
     query += "on sql_query.ticker = statistical_metrics_std.ticker) "
-    query += "where statistical_metrics_avg.avg_volume <>0 and statistical_metrics_avg.avg_price <>0"
+    query += "where statistical_metrics_avg.avg_volume <>0 and statistical_metrics_avg.avg_close <>0"
     
 
     return query
@@ -97,61 +98,61 @@ def get_lagged_data(query_data: str,day_count:str):
     for day in range(1,day_count+1):
         if day !=day_count:
             query_lag += f" lag (volume,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS volume_{day_dict[day]}_day_back,  \n"
-            query_lag += f" lag (price,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS price_{day_dict[day]}_day_back,  \n"
+            query_lag += f" lag (close,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS close_{day_dict[day]}_day_back,  \n"
         elif  day ==day_count:
             query_lag += f" lag (volume,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS volume_{day_dict[day]}_day_back,  \n"
-            query_lag += f" lag (price,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS price_{day_dict[day]}_day_back  \n"
+            query_lag += f" lag (close,{day}) OVER (PARTITION BY ticker ORDER BY _date) AS close_{day_dict[day]}_day_back  \n"
     query_lag += " from a )  \n"
     query_lag += " select * from b where _date = (select max(_date) from a)"
 
     return query_lag
     
 
-def get_price_base():
+def get_close_base():
 
     _three_day_part = "select distinct _date from yahoo_result where _date not in (select max(_date) from yahoo_result ) order by _date desc limit 3"
     
     columns_to_keep = ['no_', 'ticker', 'company', 'sector', 'industry',
-           'country', 'market', 'p_e', 'price', 'change_', 'volume','_date', '_date_ticker', 'time_', 
-           'volume_mean', 'volume_std', 'price_mean', 'price_std']
+           'country',  'p_e', 'close', 'change_', 'volume','_date', '_date_ticker', 'time_', 
+           'volume_mean', 'volume_std', 'close_mean', 'close_std']
 
-    base_query = "select ticker, close as close_price, open as price_open,  volume as volume  from yahoo_result \n"
+    base_query = "select ticker, close as close_close, open as close_open,  volume as volume  from yahoo_result \n"
     base_query += "where  \n"
     base_query += f" _date in ({get_max_date()}) \n"
 
     return base_query
 
 
-def get_first_price(base_query:str = get_price_base()):
+def get_first_close(base_query:str = get_close_base()):
 
-    first_price_query = "with a as ( \n"
-    first_price_query += f"\t{base_query}\n"
-    first_price_query += ")\n"
-    first_price_query += ", b as ( \n"
-    first_price_query += "select ticker, price_open, price_close from a"
-    first_price_query += ")\n"
-    first_price_query += ", last_with_clause as ( \n"
-    first_price_query += "select ticker, price_open as first_price from b"
-    first_price_query += ")\n"
-    first_price_query += "select ticker, first_price from last_with_clause"
+    first_close_query = "with a as ( \n"
+    first_close_query += f"\t{base_query}\n"
+    first_close_query += ")\n"
+    first_close_query += ", b as ( \n"
+    first_close_query += "select ticker, close_open, close_close from a"
+    first_close_query += ")\n"
+    first_close_query += ", last_with_clause as ( \n"
+    first_close_query += "select ticker, close_open as first_close from b"
+    first_close_query += ")\n"
+    first_close_query += "select ticker, first_close from last_with_clause"
     
-    return first_price_query
+    return first_close_query
 
-def get_last_price(base_query:str = get_price_base()):
+def get_last_close(base_query:str = get_close_base()):
 
-    last_price_query = "with a as ( \n"
-    last_price_query += f"\t{base_query}\n"
-    last_price_query += ")\n"
-    last_price_query += ", b as ( \n"
-    last_price_query += "select ticker, price_close from a"
-    last_price_query += ")\n"
-    last_price_query += ", last_with_clause as ( \n"
-    last_price_query += "select ticker, price_close as last_price from b 1"
-    last_price_query += ")\n"
-    last_price_query += "select ticker, last_price from last_with_clause"
+    last_close_query = "with a as ( \n"
+    last_close_query += f"\t{base_query}\n"
+    last_close_query += ")\n"
+    last_close_query += ", b as ( \n"
+    last_close_query += "select ticker, close_close from a"
+    last_close_query += ")\n"
+    last_close_query += ", last_with_clause as ( \n"
+    last_close_query += "select ticker, close_close as last_close from b 1"
+    last_close_query += ")\n"
+    last_close_query += "select ticker, last_close from last_with_clause"
     
 
-    return last_price_query
+    return last_close_query
 
 def sql_merge_operator(target: str, source:str, columns_to_merge, keys: str,  when_not_match:Optional[str] = None):
 

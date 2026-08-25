@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 import smtplib
-from airflow.hooks.base_hook import BaseHook
+from airflow.hooks.base import BaseHook
 from py_files.mail_operator import MessageOperator
 from py_files.commons import get_time
 from py_files.email_templates.message_body import get_statistical_results
@@ -17,7 +17,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -46,7 +45,7 @@ dag = DAG(
     'email_distribution',
     default_args = default_args,
     description = 'description of your dag',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 

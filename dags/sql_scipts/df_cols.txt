@@ -1,144 +1,135 @@
 
- price
- market
- volume
- ticker
- full_date
- z_score_price
- z_score_volume
- z_score_price_eleven_day_back
- z_score_volume_eleven_day_back
- z_score_price_twelve_day_back
- z_score_volume_twelve_day_back
- z_score_price_thirteen_day_back
- z_score_volume_thirteen_day_back
- z_score_price_fourteen_day_back
- z_score_volume_fourteen_day_back
- z_score_price_fiveteen_day_back
- z_score_volume_fiveteen_day_back
- z_score_price_sixteen_day_back
- z_score_volume_sixteen_day_back
- z_score_price_seveteen_day_back
- z_score_volume_seveteen_day_back
- z_score_price_eighteen_day_back
- z_score_volume_eighteen_day_back
- z_score_price_nineteen_day_back
- z_score_volume_nineteen_day_back
- z_score_price_twenty_day_back
- z_score_volume_twenty_day_back
- z_score_price_twenty_one_day_back
- z_score_volume_twenty_one_day_back
- z_score_price_twenty_two_day_back
- z_score_volume_twenty_two_day_back
- z_score_price_twenty_three_day_back
- z_score_volume_twenty_three_day_back
- z_score_price_twenty_four_day_back
- z_score_volume_twenty_four_day_back
- z_score_price_twenty_five_day_back
- z_score_volume_twenty_five_day_back
- z_score_price_twenty_six_day_back
- z_score_volume_twenty_six_day_back
- z_score_price_twenty_seven_day_back
- z_score_volume_twenty_seven_day_back
- z_score_price_twenty_eight_day_back
- z_score_volume_twenty_eight_day_back
- z_score_price_twenty_nine_day_back
- z_score_volume_twenty_nine_day_back
- z_score_price_thirty_day_back
- z_score_volume_thirty_day_back
- z_score_price_thirty_one_day_back
- z_score_volume_thirty_one_day_back
- z_score_price_thirty_two_day_back
- z_score_volume_thirty_two_day_back
- z_score_price_thirty_three_day_back
- z_score_volume_thirty_three_day_back
- z_score_price_thirty_four_day_back
- z_score_volume_thirty_four_day_back
- z_score_price_thirty_five_day_back
- z_score_volume_thirty_five_day_back
- z_score_price_thirty_six_day_back
- z_score_volume_thirty_six_day_back
- z_score_price_thirty_seven_day_back
- z_score_volume_thirty_seven_day_back
- z_score_price_thirty_eight_day_back
- z_score_volume_thirty_eight_day_back
- z_score_price_thirty_nine_day_back
- z_score_volume_thirty_nine_day_back
- z_score_price_forty_day_back
- z_score_volume_forty_day_back
- z_score_price_forty_one_day_back
- z_score_volume_forty_one_day_back
- z_score_price_forty_two_day_back
- z_score_volume_forty_two_day_back
- z_score_price_forty_three_day_back
- z_score_volume_forty_three_day_back
- z_score_price_forty_four_day_back
- z_score_volume_forty_four_day_back
- z_score_price_forty_five_day_back
- z_score_volume_forty_five_day_back
- z_score_price_forty_six_day_back
- z_score_volume_forty_six_day_back
- z_score_price_forty_seven_day_back
- z_score_volume_forty_seven_day_back
- z_score_price_forty_eight_day_back
- z_score_volume_forty_eight_day_back
- z_score_price_forty_nine_day_back
- z_score_volume_forty_nine_day_back
- z_score_price_fifty_day_back
- z_score_volume_fifty_day_back
- z_score_price_fifty_one_day_back
- z_score_volume_fifty_one_day_back
- z_score_price_fifty_two_day_back
- z_score_volume_fifty_two_day_back
- z_score_price_fifty_three_day_back
- z_score_volume_fifty_three_day_back
- z_score_price_fifty_four_day_back
- z_score_volume_fifty_four_day_back
- z_score_price_fifty_five_day_back
- z_score_volume_fifty_five_day_back
- eleven_twelve_difference
- twelve_thirteen_difference
- thirteen_fourteen_difference
- fourteen_fiveteen_difference
- fiveteen_sixteen_difference
- sixteen_seveteen_difference
- seveteen_eighteen_difference
- eighteen_nineteen_difference
- nineteen_twenty_difference
- twenty_twenty_one_difference
- twenty_one_twenty_two_difference
- twenty_two_twenty_three_difference
- twenty_three_twenty_four_difference
- twenty_four_twenty_five_difference
- twenty_five_twenty_six_difference
- twenty_six_twenty_seven_difference
- twenty_seven_twenty_eight_difference
- twenty_eight_twenty_nine_difference
- twenty_nine_thirty_difference
- thirty_thirty_one_difference
- thirty_one_thirty_two_difference
- thirty_two_thirty_three_difference
- thirty_three_thirty_four_difference
- thirty_four_thirty_five_difference
- thirty_five_thirty_six_difference
- thirty_six_thirty_seven_difference
- thirty_seven_thirty_eight_difference
- thirty_eight_thirty_nine_difference
- thirty_nine_forty_difference
- forty_forty_one_difference
- forty_one_forty_two_difference
- forty_two_forty_three_difference
- forty_three_forty_four_difference
- forty_four_forty_five_difference
- forty_five_forty_six_difference
- forty_six_forty_seven_difference
- forty_seven_forty_eight_difference
- forty_eight_forty_nine_difference
- forty_nine_fifty_difference
- fifty_fifty_one_difference
- fifty_one_fifty_two_difference
- fifty_two_fifty_three_difference
- fifty_three_fifty_four_difference
- fifty_four_fifty_five_difference
- difference
- category
+ z_score_close_eleven_day_back: float64
+ z_score_volume_eleven_day_back: float64
+ z_score_close_twelve_day_back: float64
+ z_score_volume_twelve_day_back: float64
+ z_score_close_thirteen_day_back: float64
+ z_score_volume_thirteen_day_back: float64
+ z_score_close_fourteen_day_back: float64
+ z_score_volume_fourteen_day_back: float64
+ z_score_close_fiveteen_day_back: float64
+ z_score_volume_fiveteen_day_back: float64
+ z_score_close_sixteen_day_back: float64
+ z_score_volume_sixteen_day_back: float64
+ z_score_close_seveteen_day_back: float64
+ z_score_volume_seveteen_day_back: float64
+ z_score_close_eighteen_day_back: float64
+ z_score_volume_eighteen_day_back: float64
+ z_score_close_nineteen_day_back: float64
+ z_score_volume_nineteen_day_back: float64
+ z_score_close_twenty_day_back: float64
+ z_score_volume_twenty_day_back: float64
+ z_score_close_twenty_one_day_back: float64
+ z_score_volume_twenty_one_day_back: float64
+ z_score_close_twenty_two_day_back: float64
+ z_score_volume_twenty_two_day_back: float64
+ z_score_close_twenty_three_day_back: float64
+ z_score_volume_twenty_three_day_back: float64
+ z_score_close_twenty_four_day_back: float64
+ z_score_volume_twenty_four_day_back: float64
+ z_score_close_twenty_five_day_back: float64
+ z_score_volume_twenty_five_day_back: float64
+ z_score_close_twenty_six_day_back: float64
+ z_score_volume_twenty_six_day_back: float64
+ z_score_close_twenty_seven_day_back: float64
+ z_score_volume_twenty_seven_day_back: float64
+ z_score_close_twenty_eight_day_back: float64
+ z_score_volume_twenty_eight_day_back: float64
+ z_score_close_twenty_nine_day_back: float64
+ z_score_volume_twenty_nine_day_back: float64
+ z_score_close_thirty_day_back: float64
+ z_score_volume_thirty_day_back: float64
+ z_score_close_thirty_one_day_back: float64
+ z_score_volume_thirty_one_day_back: float64
+ z_score_close_thirty_two_day_back: float64
+ z_score_volume_thirty_two_day_back: float64
+ z_score_close_thirty_three_day_back: float64
+ z_score_volume_thirty_three_day_back: float64
+ z_score_close_thirty_four_day_back: float64
+ z_score_volume_thirty_four_day_back: float64
+ z_score_close_thirty_five_day_back: float64
+ z_score_volume_thirty_five_day_back: float64
+ z_score_close_thirty_six_day_back: float64
+ z_score_volume_thirty_six_day_back: float64
+ z_score_close_thirty_seven_day_back: float64
+ z_score_volume_thirty_seven_day_back: float64
+ z_score_close_thirty_eight_day_back: float64
+ z_score_volume_thirty_eight_day_back: float64
+ z_score_close_thirty_nine_day_back: float64
+ z_score_volume_thirty_nine_day_back: float64
+ z_score_close_forty_day_back: float64
+ z_score_volume_forty_day_back: float64
+ z_score_close_forty_one_day_back: float64
+ z_score_volume_forty_one_day_back: float64
+ z_score_close_forty_two_day_back: float64
+ z_score_volume_forty_two_day_back: float64
+ z_score_close_forty_three_day_back: float64
+ z_score_volume_forty_three_day_back: float64
+ z_score_close_forty_four_day_back: float64
+ z_score_volume_forty_four_day_back: float64
+ z_score_close_forty_five_day_back: float64
+ z_score_volume_forty_five_day_back: float64
+ z_score_close_forty_six_day_back: float64
+ z_score_volume_forty_six_day_back: float64
+ z_score_close_forty_seven_day_back: float64
+ z_score_volume_forty_seven_day_back: float64
+ z_score_close_forty_eight_day_back: float64
+ z_score_volume_forty_eight_day_back: float64
+ z_score_close_forty_nine_day_back: float64
+ z_score_volume_forty_nine_day_back: float64
+ z_score_close_fifty_day_back: float64
+ z_score_volume_fifty_day_back: float64
+ z_score_close_fifty_one_day_back: float64
+ z_score_volume_fifty_one_day_back: float64
+ z_score_close_fifty_two_day_back: float64
+ z_score_volume_fifty_two_day_back: float64
+ z_score_close_fifty_three_day_back: float64
+ z_score_volume_fifty_three_day_back: float64
+ z_score_close_fifty_four_day_back: float64
+ z_score_volume_fifty_four_day_back: float64
+ z_score_close_fifty_five_day_back: int64
+ z_score_volume_fifty_five_day_back: int64
+ eleven_twelve_difference: float64
+ twelve_thirteen_difference: float64
+ thirteen_fourteen_difference: float64
+ fourteen_fiveteen_difference: float64
+ fiveteen_sixteen_difference: float64
+ sixteen_seveteen_difference: float64
+ seveteen_eighteen_difference: float64
+ eighteen_nineteen_difference: float64
+ nineteen_twenty_difference: float64
+ twenty_twenty_one_difference: float64
+ twenty_one_twenty_two_difference: float64
+ twenty_two_twenty_three_difference: float64
+ twenty_three_twenty_four_difference: float64
+ twenty_four_twenty_five_difference: float64
+ twenty_five_twenty_six_difference: float64
+ twenty_six_twenty_seven_difference: float64
+ twenty_seven_twenty_eight_difference: float64
+ twenty_eight_twenty_nine_difference: float64
+ twenty_nine_thirty_difference: float64
+ thirty_thirty_one_difference: float64
+ thirty_one_thirty_two_difference: float64
+ thirty_two_thirty_three_difference: float64
+ thirty_three_thirty_four_difference: float64
+ thirty_four_thirty_five_difference: float64
+ thirty_five_thirty_six_difference: float64
+ thirty_six_thirty_seven_difference: float64
+ thirty_seven_thirty_eight_difference: float64
+ thirty_eight_thirty_nine_difference: float64
+ thirty_nine_forty_difference: float64
+ forty_forty_one_difference: float64
+ forty_one_forty_two_difference: float64
+ forty_two_forty_three_difference: float64
+ forty_three_forty_four_difference: float64
+ forty_four_forty_five_difference: float64
+ forty_five_forty_six_difference: float64
+ forty_six_forty_seven_difference: float64
+ forty_seven_forty_eight_difference: float64
+ forty_eight_forty_nine_difference: float64
+ forty_nine_fifty_difference: float64
+ fifty_fifty_one_difference: float64
+ fifty_one_fifty_two_difference: float64
+ fifty_two_fifty_three_difference: float64
+ fifty_three_fifty_four_difference: float64
+ fifty_four_fifty_five_difference: int64

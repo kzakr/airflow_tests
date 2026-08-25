@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.sensors.external_task import ExternalTaskSensor
 
@@ -15,7 +15,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -53,23 +52,23 @@ dag = DAG(
     start_date= datetime(2025, 3, 17),
     default_args = default_args,
     description = 'description of your dag_2',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 
-wait_for_upload = ExternalTaskSensor(
-        task_id='wait_for_yahoo_upload',
-        external_dag_id='yahoo_data_upload',
-        external_task_id='clean_results',
-        timeout=86400,
-        mode='reschedule',
-        dag=dag,
-    )
+#wait_for_upload = ExternalTaskSensor(
+#        task_id='wait_for_yahoo_upload',
+#        external_dag_id='yahoo_data_upload',
+#        external_task_id='clean_results',
+#        timeout=86400,
+#        mode='reschedule',
+#        dag=dag,
+#    )
 
-create_tables = PostgresOperator(
+create_tables = SQLExecuteQueryOperator(
         task_id='create_view_with_increasing_values',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/create_statistical_tables_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -91,18 +90,18 @@ create_tables = PostgresOperator(
 #)
 #
 
-create_view_with_increasing_values_task = PostgresOperator(
+create_view_with_increasing_values_task = SQLExecuteQueryOperator(
         task_id='insert_values_inc',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_tickers_increasing_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
         dag=dag,
     )
 
-create_view_with_decreasing_values_task = PostgresOperator(
+create_view_with_decreasing_values_task = SQLExecuteQueryOperator(
         task_id='insert_values_dec',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_tickers_decreasing_yahoo.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -114,6 +113,6 @@ finish_statistical_workflow = EmptyOperator(
         dag=dag,
     )
 
-wait_for_upload >> create_tables
+#wait_for_upload >> create_tables
 create_tables >> [create_view_with_increasing_values_task, create_view_with_decreasing_values_task] >> finish_statistical_workflow
 

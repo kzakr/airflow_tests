@@ -1,12 +1,41 @@
 # import libraries
-import pandas as pd
-from sqlalchemy import create_engine
+import os
 import time
 import csv
 from io import StringIO
+from pathlib import Path
+
+import pandas as pd
 import psycopg2
+from sqlalchemy import create_engine as sqlalchemy_create_engine
 from typing import List, Optional
 import sys
+
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:  # pragma: no cover - optional for local development
+    load_dotenv = None
+
+from py_files.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
+if load_dotenv is not None:
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
+
+
+def get_postgres_url() -> str:
+    """Build the Postgres URL from environment variables.
+
+    Inside Docker Compose, POSTGRES_HOST should resolve to the service name `postgres`.
+    When running directly on the host, `localhost` or `host.docker.internal` is typical.
+    """
+    host = os.getenv("POSTGRES_HOST", "localhost")
+    dbname = os.getenv("POSTGRES_DB", "airflow")
+    user = os.getenv("POSTGRES_USER", "airflow")
+    password = os.getenv("POSTGRES_PASSWORD", "airflow")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    return f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
 
 def psql_insert_copy(table, conn, keys, data_iter): #mehod
     """
@@ -40,12 +69,11 @@ def psql_insert_copy(table, conn, keys, data_iter): #mehod
         cur.copy_expert(sql=sql, file=s_buf)
 
 
-def create_engine(connection:str):
-
-    connection = create_engine(connection)
-
-    return connection
-
+def create_engine(connection: Optional[str] = None):
+    """Create a SQLAlchemy engine for Postgres, defaulting to env-based configuration."""
+    if connection is None:
+        connection = get_postgres_url()
+    return sqlalchemy_create_engine(connection)
 
 
 def postgres_bulk(data,table_name:str,  if_exists:str , engine_conn, ) :
@@ -55,10 +83,10 @@ def postgres_bulk(data,table_name:str,  if_exists:str , engine_conn, ) :
         df = data
 
     # Example: 'postgresql://username:password@localhost:5432/your_database'
-    engine = 'postgresql://airflow:airflow@host.docker.internal:5432/airflow'#engine_conn 
+    engine = engine_conn if engine_conn is not None else create_engine()
 
-    start_time = time.time() # get start time before insert
-    print("inserting data")
+    start_time = time.time()  # get start time before insert
+    logger.info("Inserting data into %s", table_name)
     df.to_sql(
         name=table_name,
         con=engine,
@@ -70,23 +98,18 @@ def postgres_bulk(data,table_name:str,  if_exists:str , engine_conn, ) :
     end_time = time.time() # get end time after insert
     total_time = end_time - start_time # calculate the time
     
-    print(f"Insert time: {total_time} seconds") # print time
+    logger.info("Insert time: %s seconds", total_time)
 
 def create_connection():
-    """ Connect to database """
-    
+    """Connect to database."""
     try:
-        print("Connecting…")
-        conn = psycopg2.connect(
-                        host='host.docker.internal',
-                        database="airflow",
-                        user="airflow",
-                        password="airflow")
+        logger.info("Connecting to Postgres")
+        conn = create_engine()
+        logger.info("Connection successful")
+        return conn
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        
-    print("All good, Connection successful!")
-    return conn
+        logger.exception("Error connecting to Postgres")
+        raise
 
 def sql_to_dataframe(query:str, conn, column_names = None)-> pd.DataFrame:
     """

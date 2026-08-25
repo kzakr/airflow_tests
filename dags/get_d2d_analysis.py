@@ -1,6 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
 
 import datetime
@@ -12,7 +12,7 @@ from py_files.commons import add_column_based_on_confition, types_mapper
 from py_files.attr import CommonConditions
 from py_files.postgres_bulk import create_connection, sql_to_dataframe, postgres_bulk
 
-from airflow.hooks.base_hook import BaseHook
+from airflow.hooks.base import BaseHook
 from py_files.commons import get_time
 from py_files.mail_operator import MessageOperator
 from py_files.email_templates.message_body import get_statistical_results
@@ -190,9 +190,9 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2020, 1, 1), 
     #)
 
 
-    create_db_tables_task_task = PostgresOperator(
+    create_db_tables_task_task = SQLExecuteQueryOperator(
         task_id='create_db_tables_task',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/create_analytics_tables.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -225,17 +225,17 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2020, 1, 1), 
 
     )
 
-    execute_add_first_price_validation_data_task = PostgresOperator(
+    execute_add_first_price_validation_data_task = SQLExecuteQueryOperator(
         task_id='execute_add_first_price_validation_data_task',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql="./sql_scipts/join_first_price.sql",
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
 
-    execute_add_last_price_validation_data_task = PostgresOperator(
+    execute_add_last_price_validation_data_task = SQLExecuteQueryOperator(
         task_id='execute_add_last_price_validation_data_task',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql="./sql_scipts/join_last_price.sql",
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -245,7 +245,7 @@ with DAG(dag_id = "analyze_datasets", start_date=datetime.datetime(2020, 1, 1), 
     send_email = PythonOperator(
      task_id = 'send_emial',
      python_callable = prepare_message,
-     provide_context = True,
+    
      
     )
 

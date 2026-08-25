@@ -4,7 +4,7 @@ os.chdir(os.path.dirname(os.getcwd()))
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 #from airflow.operators.branch_operator import BaseBranchOperator
 from airflow.operators.bash import BashOperator
 import datetime
@@ -33,23 +33,23 @@ with DAG(dag_id = "yahoo_data_upload", start_date=datetime.datetime(2025, 1, 1),
     #
     #)
     
-    create_db_table_task = PostgresOperator(
+    create_db_table_task = SQLExecuteQueryOperator(
         task_id='create_db_table',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/yahoo_prices_table.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
-    create_db_staging_table_task = PostgresOperator(
+    create_db_staging_table_task = SQLExecuteQueryOperator(
         task_id='create_db_staging_tables',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/yahoo_prices_table_staging.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
-    insert_into_db_table_task = PostgresOperator(
+    insert_into_db_table_task = SQLExecuteQueryOperator(
         task_id='insert_db_table',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/yahoo_result_insert_staging.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -64,9 +64,9 @@ with DAG(dag_id = "yahoo_data_upload", start_date=datetime.datetime(2025, 1, 1),
     )
 
 
-    clean_results = PostgresOperator(
+    clean_results = SQLExecuteQueryOperator(
         task_id='clean_results',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/clean_yahoo_result.sql',
         retries=1,
         retry_delay=timedelta(minutes=3),

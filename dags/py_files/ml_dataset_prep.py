@@ -225,17 +225,24 @@ def get_list_of_ticker_with_count(DataFrame = pd.DataFrame, count:int = 10, z_sc
     #full_df_copy_grouped.reset_index(inplace = True)#["Ticker"].value_counts()>30
     
     full_df_copy_grouped = DataFrame[DataFrame["difference"]>z_score_diff]
+    full_df_copy_grouped = DataFrame[DataFrame["difference"]>z_score_diff]
+    if full_df_copy_grouped.empty:
+        return []
 
-    tickers = full_df_copy_grouped["ticker"].value_counts()>count
-    
-    tickers= tickers.index[:].to_list()
-    #tickers = tickers[tickers == True].index[:].to_list()
-    return tickers
+    vc = full_df_copy_grouped["ticker"].value_counts()
+    filtered = vc[vc > count]
+    if filtered.empty:
+        return []
+
+    return filtered.index.to_list()
 
 def prepare_df_1(tickers, DataFrame: pd.DataFrame):
 
     DataFrame = DataFrame[DataFrame["ticker"].isin(tickers)]
     print(len(DataFrame))
+    if DataFrame.empty:
+        return pd.DataFrame(columns=list(DataFrame.columns) + ["category"]) 
+    DataFrame = DataFrame.copy()
     DataFrame["category"] = 1
     return DataFrame
 
@@ -243,19 +250,45 @@ def prepare_df_0(tickers, DataFrame: pd.DataFrame):
 
     
     
-    DataFrame = DataFrame[DataFrame["ticker"].isin(tickers)==0]
-    DataFrame = DataFrame.sample(len(tickers))
-    DataFrame["category"] = 0
-    return DataFrame
+    if not isinstance(tickers, (list, tuple, set)):
+        tickers = list(tickers) if tickers is not None else []
+
+    n = len(tickers)
+    neg_df = DataFrame[~DataFrame["ticker"].isin(tickers)].copy()
+    if n == 0 or neg_df.empty:
+        return pd.DataFrame(columns=list(neg_df.columns) + ["category"]) 
+
+    if len(neg_df) >= n:
+        sampled = neg_df.sample(n, random_state=42)
+    else:
+        sampled = neg_df.sample(n, replace=True, random_state=42)
+
+    sampled = sampled.copy()
+    sampled["category"] = 0
+    return sampled
 
 def get_data_sets(df_1: pd.DataFrame, df_0: pd.DataFrame, split_size: float=0.33):
 
     from sklearn.model_selection import train_test_split
     
     df = pd.concat([df_1, df_0])
+    if df.empty:
+        return None, None, None, None
+
     target = df["category"]
     df.drop(columns = ["ticker", "category", "difference", "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
+
+    if len(df) < 2:
+        return None, None, None, None
+
+    import numpy as np
+    # keep only numeric columns (drop dates/objects that cause float() errors)
+    numeric_df = df.select_dtypes(include=[np.number])
+    if numeric_df.shape[1] == 0:
+        return None, None, None, None
+    target = target.loc[numeric_df.index]
+    df = numeric_df
 
 
     
@@ -263,7 +296,7 @@ def get_data_sets(df_1: pd.DataFrame, df_0: pd.DataFrame, split_size: float=0.33
     #X_train, X_test, y_train, y_test = 0,0,0,0
 
     X_train, X_test, y_train, y_test = train_test_split(
-        df, target, test_size=split_size, random_state=42)##
+        df, target, test_size=split_size, random_state=42)
     
     return X_train, X_test, y_train, y_test
 

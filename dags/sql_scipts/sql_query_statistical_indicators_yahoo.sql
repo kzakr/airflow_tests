@@ -169,9 +169,9 @@ from (
 	select * from (
 	select *,  ROW_NUMBER() over (PARTITION BY ticker, full_date order by time_ desc) rn 
 from( 
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
- full_date > (20260102)  
+ full_date > '2026-01-02'  
 
 )
 )
@@ -469,7 +469,7 @@ from (
 	full_date as full_date, 
 	avg(volume) as volume from 
 (
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
  full_date > (20260102)  
 
@@ -754,7 +754,7 @@ from (
 	select * from (
 	select *,  ROW_NUMBER() over (PARTITION BY ticker, full_date order by time_ desc) rn 
 from( 
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
  full_date > (20260105)  
 
@@ -1038,7 +1038,7 @@ from (
 	full_date as full_date, 
 	avg(volume) as volume from 
 (
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
  full_date > (20260105)  
 
@@ -1323,7 +1323,7 @@ from (
 	select * from (
 	select *,  ROW_NUMBER() over (PARTITION BY ticker, full_date order by time_ desc) rn 
 from( 
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
  full_date > (20260105)  
 
@@ -1607,7 +1607,7 @@ from (
 	full_date as full_date, 
 	avg(volume) as volume from 
 (
-	select ticker, full_date, price, volume as volume, time_ from finviz_result 
+	select ticker, full_date, price, volume as volume, time_ from yahoo_result 
 where  
  full_date > (20260105)  
 

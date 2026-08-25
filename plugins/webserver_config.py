@@ -20,7 +20,13 @@ from __future__ import annotations
 
 import os
 
-from airflow.www.fab_security.manager import AUTH_DB
+try:
+    from airflow.www.fab_security.manager import AUTH_DB
+except ImportError:
+    try:
+        from flask_appbuilder.security.manager import AUTH_DB
+    except ImportError:
+        AUTH_DB = "AUTH_DB"
 
 # from airflow.www.fab_security.manager import AUTH_LDAP
 # from airflow.www.fab_security.manager import AUTH_OAUTH

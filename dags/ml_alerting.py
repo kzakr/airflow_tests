@@ -1,6 +1,6 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from py_files.models import dt_model, ct_model
 from py_files.ml_dataset_prep import get_data_sets, prepare_df_0, prepare_df_1,get_list_of_ticker_with_count, get_zscore_difference,get_data_query,get_data_view
 from py_files.postgres_bulk import  create_connection
@@ -10,7 +10,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -45,14 +44,14 @@ dag = DAG(
     'aa_ml_test_nl',
     default_args = default_args,
     description = 'description of your dag',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 ml_flow = PythonOperator(
      task_id = 'ml_flow',
      python_callable = _ml_flow,
-     provide_context = True,
+    
      dag = dag
 )
 

@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 from py_files.commons import get_time, get_last_weekday
 
@@ -18,7 +18,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -86,7 +85,10 @@ def _prepare_ds(**kwargs):
                 print("cos")
             #df.dropna(inplace = True)
             df_tmp.fillna( -99999,inplace = True)
-            df_tmp = df_tmp.sample(1000)
+            if df_tmp.empty:
+                continue
+            n_sample1 = min(1000, len(df_tmp))
+            df_tmp = df_tmp.sample(n_sample1, random_state=42)
       
             tickers_list = get_list_of_ticker_with_count(df_tmp, 20, z_score_diff = cut_off)
             df_1_tmp = prepare_df_1(tickers_list, df_tmp)
@@ -95,7 +97,8 @@ def _prepare_ds(**kwargs):
             df_0 = pd.concat([df_0, df_0_tmp])
             df_1.fillna( -99999,inplace = True)
             df_0.fillna( -99999,inplace = True)
-            df= pd.concat([df, df_tmp.sample(500)])
+            n_sample2 = min(500, len(df_tmp))
+            df= pd.concat([df, df_tmp.sample(n_sample2, random_state=42)])
 
             
             cut_off_model_dict[str(cut_off)]  = {"positive": df_1, "negative": df_0}
@@ -133,7 +136,9 @@ def _prepare_ds(**kwargs):
         df_1 = cut_off_model_dict[str(cut_off)]["positive"]
         df_0 = cut_off_model_dict[str(cut_off)]["negative"]
         X_train, X_test, y_train, y_test = get_data_sets(df_1, df_0)
-
+        if X_train is None:
+            print(f"Not enough samples for cut_off {cut_off}, skipping model training")
+            continue
 
         dt = dt_model(X_train, X_test, y_train, y_test)
         ct = ct_model(X_train, X_test, y_train, y_test)
@@ -143,16 +148,20 @@ def _prepare_ds(**kwargs):
         df_1_t = prepare_df_1(tickers_list, df)
         df_0_t = df[df["ticker"].isin(tickers_list)==0]
         df_0_t["category"] = 0
- 
+
         with open("./dags/sql_scipts/df_cols.txt", "w") as file:
             for tt in df_1_t.columns.tolist():
                 file.write("\n "+ tt)
         print(df_1_t.columns.tolist())
-        X_train, X_test, y_train, y_test = get_data_sets(df_1_t, df_0_t)
-        print(dt.score(X_test,y_test))
-        print(ct.score(X_test,y_test))
-        print(svm.score(X_test,y_test))
-        print(gbc.score(X_test,y_test))
+        X_train2, X_test2, y_train2, y_test2 = get_data_sets(df_1_t, df_0_t)
+        if X_train2 is not None:
+            print(dt.score(X_test2,y_test2))
+            print(ct.score(X_test2,y_test2))
+            print(svm.score(X_test2,y_test2))
+            print(gbc.score(X_test2,y_test2))
+        else:
+            print(f"Not enough samples to evaluate models for cut_off {cut_off}")
+
         models[str(cut_off)]= [dt, ct, svm, gbc]
 
 
@@ -161,7 +170,8 @@ def _prepare_ds(**kwargs):
     tickers_list = get_list_of_ticker_with_count(df2, 15, -20)
     del df_1
     del df_0
-    df2 = df2.sample(500)
+    if not df2.empty:
+        df2 = df2.sample(min(500, len(df2)))
     df2.drop(columns = [ "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
     X_full = df2
@@ -217,28 +227,28 @@ dag = DAG(
     start_date= datetime(2025, 3, 17),
     default_args = default_args,
     description = 'description of your dag_2',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 prepare_view = PythonOperator(
      task_id = 'prepare_view',
      python_callable = _prepare_view,
-     provide_context = True,
+    
      dag = dag
 )
-create_view_staging_table_task = PostgresOperator(
+create_view_staging_table_task = SQLExecuteQueryOperator(
         task_id='create_db_staging_tables',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_check_ml.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
     
 
-create_view_validate_staging_table_task = PostgresOperator(
+create_view_validate_staging_table_task = SQLExecuteQueryOperator(
         task_id='create_db_validate_staging_tables',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_check_ml_validate.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -246,7 +256,7 @@ create_view_validate_staging_table_task = PostgresOperator(
 get_data_from_view = PythonOperator(
      task_id = 'get_data_from_view',
      python_callable = _get_data_from_view,
-     provide_context = True,
+    
      dag = dag
 )
 
@@ -254,14 +264,14 @@ get_data_from_view = PythonOperator(
 get_data_validate_from_view = PythonOperator(
      task_id = 'get_data_validate_from_view',
      python_callable = _get_data_validate_from_view,
-     provide_context = True,
+    
      dag = dag
 )
 
 prepare_ds = PythonOperator(
      task_id = 'prepare_ds',
      python_callable = _prepare_ds,
-     provide_context = True,
+    
      dag = dag
 )
 

@@ -1,8 +1,8 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 
-from airflow.operators.python_operator import PythonOperator
-from airflow.hooks.base_hook import BaseHook
+from airflow.operators.python import PythonOperator
+from airflow.hooks.base import BaseHook
 from airflow.sensors.external_task import ExternalTaskSensor
 from py_files.mail_operator import MessageOperator
 from py_files.commons import get_time, list_in_directory
@@ -22,7 +22,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -51,14 +50,14 @@ dag = DAG(
     'email_distribution_ml_predict',
     default_args = default_args,
     description = 'description of your dag',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 task1 = PythonOperator(
      task_id = 'execute_python_command',
      python_callable = prepare_message,
-     provide_context = True,
+    
      dag = dag
 )
 

@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 from py_files.commons import get_time, get_last_weekday
 
@@ -10,15 +10,17 @@ from py_files.ml_dataset_prep import get_data_view, get_data_query,\
         prepare_df_0, prepare_df_1, get_zscore_difference, get_data_sets
 from py_files.postgres_bulk import create_connection, sql_to_dataframe
 from py_files.models import dt_model, ct_model, svm_model, gbc_model
+from py_files.logging_utils import get_logger
 import pandas as pd
 import os
+
+logger = get_logger(__name__)
 
 
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -43,10 +45,10 @@ def _prepare_view():
     try:
         os.remove("./dags/sql_scipts/sql_query_check_ml.sql")
     except Exception as ex:
-        print(ex)
+        logger.warning("Unable to remove SQL file: %s", ex)
     for i in range(0,len(dates_to_train)):
         get_data_view(file_num=i, after_day=dates_to_train[i], interval = _interval)
-    get_data_validate_view(after_day = get_last_weekday(), interval = _interval)
+    get_data_validate_view(after_day = get_last_weekday(format="%Y-%m-%d"), interval = _interval)
 
 def _get_data_from_view(**kwargs):
     for i in range(0,len(dates_to_train)):
@@ -85,16 +87,19 @@ def _prepare_ds(**kwargs):
             try:
                 df_tmp.drop(columns = ['z_score_price_sixty_nine_day_back',
                     'z_score_volume_seventy_day_back'], inplace = True)
-            except:
-                print("cos")
+            except Exception:
+                logger.debug("Skipped removal of legacy price z-score columns")
             try:
                 df_tmp.drop(columns = ['z_score_price_fourty_five_day_back',
                     'z_score_volume_fifty_five_day_back'], inplace = True)
-            except:
-                print("cos")
+            except Exception:
+                logger.debug("Skipped removal of legacy price extra z-score columns")
             #df.dropna(inplace = True)
             df_tmp.fillna( -99999,inplace = True)
-            df_tmp = df_tmp.sample(1000)
+            if df_tmp.empty:
+                continue
+            n_sample1 = min(1000, len(df_tmp))
+            df_tmp = df_tmp.sample(n_sample1, random_state=42)
       
             tickers_list = get_list_of_ticker_with_count(df_tmp, 20, z_score_diff = cut_off)
             df_1_tmp = prepare_df_1(tickers_list, df_tmp)
@@ -103,7 +108,8 @@ def _prepare_ds(**kwargs):
             df_0 = pd.concat([df_0, df_0_tmp])
             df_1.fillna( -99999,inplace = True)
             df_0.fillna( -99999,inplace = True)
-            df= pd.concat([df, df_tmp.sample(500)])
+            n_sample2 = min(500, len(df_tmp))
+            df= pd.concat([df, df_tmp.sample(n_sample2, random_state=42)])
 
             
             cut_off_model_dict[str(cut_off)]  = {"positive": df_1, "negative": df_0}
@@ -121,13 +127,13 @@ def _prepare_ds(**kwargs):
     try:
         df2.drop(columns = ['z_score_price_sixty_nine_day_back',
             'z_score_volume_seventy_day_back'], inplace = True)
-    except:
-        print("cos")
+    except Exception:
+        logger.debug("Skipped removal of validation price z-score columns")
     try:
         df2.drop(columns = ['z_score_price_fourty_five_day_back',
             'z_score_volume_fifty_five_day_back'], inplace = True)
-    except:
-        print("cos")
+    except Exception:
+        logger.debug("Skipped removal of validation price extra z-score columns")
     nan_cols = [i for i in df2.columns if df2[i].isnull().any()]
     #df2.dropna(inplace = True)
     df2.fillna( -99999,inplace = True)
@@ -139,13 +145,13 @@ def _prepare_ds(**kwargs):
     try:
         df3.drop(columns = ['z_score_price_sixty_nine_day_back',
             'z_score_volume_seventy_day_back'], inplace = True)
-    except:
-        print("cos")
+    except Exception:
+        logger.debug("Skipped removal of prediction price z-score columns")
     try:
         df3.drop(columns = ['z_score_price_fourty_five_day_back',
             'z_score_volume_fifty_five_day_back'], inplace = True)
-    except:
-        print("cos")
+    except Exception:
+        logger.debug("Skipped removal of prediction price extra z-score columns")
     nan_cols = [i for i in df3.columns if df3[i].isnull().any()]
     #df3.dropna(inplace = True)
     df3.fillna( -99999,inplace = True)
@@ -160,6 +166,9 @@ def _prepare_ds(**kwargs):
         df_1 = cut_off_model_dict[str(cut_off)]["positive"]
         df_0 = cut_off_model_dict[str(cut_off)]["negative"]
         X_train, X_test, y_train, y_test = get_data_sets(df_1, df_0)
+        if X_train is None:
+            logger.warning("Not enough samples for cut_off %s, skipping model training", cut_off)
+            continue
 
         dt = dt_model(X_train, X_test, y_train, y_test)
         ct = ct_model(X_train, X_test, y_train, y_test)
@@ -169,16 +178,22 @@ def _prepare_ds(**kwargs):
         df_1_t = prepare_df_1(tickers_list, df)
         df_0_t = df[df["ticker"].isin(tickers_list)==0]
         df_0_t["category"] = 0
- 
+
         with open("./dags/sql_scipts/df_cols.txt", "w") as file:
             for tt in df_1_t.columns.tolist():
                 file.write("\n "+ tt)
-        print(df_1_t.columns.tolist())
-        X_train, X_test, y_train, y_test = get_data_sets(df_1_t, df_0_t)
-        print(dt.score(X_test,y_test))
-        print(ct.score(X_test,y_test))
-        print(svm.score(X_test,y_test))
-        print(gbc.score(X_test,y_test))
+        logger.debug("Training columns: %s", df_1_t.columns.tolist())
+        X_train2, X_test2, y_train2, y_test2 = get_data_sets(df_1_t, df_0_t)
+        if X_train2 is not None:
+            logger.info("Model evaluation for cut_off %s: DT=%s, CT=%s, SVM=%s, GBC=%s",
+                        cut_off,
+                        dt.score(X_test2, y_test2),
+                        ct.score(X_test2, y_test2),
+                        svm.score(X_test2, y_test2),
+                        gbc.score(X_test2, y_test2))
+        else:
+            logger.warning("Not enough samples to evaluate models for cut_off %s", cut_off)
+
         models[str(cut_off)]= [dt, ct, svm, gbc]
 
 
@@ -186,14 +201,16 @@ def _prepare_ds(**kwargs):
 
     tickers_list = get_list_of_ticker_with_count(df2, 15, -20)
     
-    df2 = df2.sample(500)
+    if not df2.empty:
+        df2 = df2.sample(min(500, len(df2)))
     df2.drop(columns = [ "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
     X_full = df2
     tickers_to_verify = X_full[["ticker", "difference"]]
     X_full.drop(columns = ["ticker",  "difference"], inplace = True)
 
-    df3 = df3.sample(500)
+    if not df3.empty:
+        df3 = df3.sample(min(500, len(df3)))
     df3.drop(columns = [ "z_score_price", 
     "z_score_volume", "volume", "price"], inplace = True)
     X_pred = df3
@@ -206,14 +223,7 @@ def _prepare_ds(**kwargs):
         ct = model[1]
         svm = model[2]
         gbc = model[3]
-        print("-"*111)
-        print(len(dt.predict(X_full).tolist()))
-        print(sum(dt.predict(X_full).tolist()))
-        print(dt.predict(X_full).tolist())
-        print("-"*111)
-        print(len(svm.predict(X_full).tolist()))
-        print(sum(svm.predict(X_full).tolist()))
-        print(svm.predict(X_full).tolist())
+        logger.info("Prediction summary for cutoff %s: DT=%s, SVM=%s", cut_off, sum(dt.predict(X_full).tolist()), sum(svm.predict(X_full).tolist()))
         dictionary_or_results = { "dt_pred": dt.predict(X_full).tolist() \
             , "gbc_pred": gbc.predict(X_full).tolist(), "svm_pred": svm.predict(X_full).tolist(),\
                "ct_pred": ct.predict(X_full).tolist() }
@@ -264,28 +274,28 @@ dag = DAG(
     start_date= datetime(2025, 3, 17),
     default_args = default_args,
     description = 'description of your dag_2',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 prepare_view = PythonOperator(
      task_id = 'prepare_view',
      python_callable = _prepare_view,
-     provide_context = True,
+    
      dag = dag
 )
-create_view_staging_table_task = PostgresOperator(
+create_view_staging_table_task = SQLExecuteQueryOperator(
         task_id='create_db_staging_tables',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_check_ml.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
     
 
-create_view_validate_staging_table_task = PostgresOperator(
+create_view_validate_staging_table_task = SQLExecuteQueryOperator(
         task_id='create_db_validate_staging_tables',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_check_ml_validate.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -293,7 +303,7 @@ create_view_validate_staging_table_task = PostgresOperator(
 get_data_from_view = PythonOperator(
      task_id = 'get_data_from_view',
      python_callable = _get_data_from_view,
-     provide_context = True,
+    
      dag = dag
 )
 
@@ -301,20 +311,20 @@ get_data_from_view = PythonOperator(
 get_data_validate_from_view = PythonOperator(
      task_id = 'get_data_validate_from_view',
      python_callable = _get_data_validate_from_view,
-     provide_context = True,
+    
      dag = dag
 )
 get_data_predict_from_view = PythonOperator(
      task_id = 'get_data_predict_from_view',
      python_callable = _get_data_predict_from_view,
-     provide_context = True,
+    
      dag = dag
 )
 
 prepare_ds = PythonOperator(
      task_id = 'prepare_ds',
      python_callable = _prepare_ds,
-     provide_context = True,
+    
      dag = dag
 )
 

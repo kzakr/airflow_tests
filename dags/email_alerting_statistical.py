@@ -3,10 +3,10 @@ from jinja2 import Template
 from datetime import datetime, timedelta
 import smtplib
 from airflow.utils.email import send_email
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.email_operator import EmailOperator
-from airflow.hooks.base_hook import BaseHook
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.smtp.operators.smtp import EmailOperator
+from airflow.hooks.base import BaseHook
 from airflow.sensors.external_task import ExternalTaskSensor
 from py_files.mail_operator import MessageOperator
 from py_files.email_templates.email_template import get_message_body
@@ -24,7 +24,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2026, 2, 1),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -66,20 +65,20 @@ dag = DAG(
     'email_distribution_statistical',
     default_args = default_args,
     description = 'description of your dag',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 task1 = PythonOperator(
      task_id = 'statistical_results',
      python_callable = prepare_message,
-     provide_context = True,
+    
      dag = dag
 )
 task2 = PythonOperator(
      task_id = 'statistical_results_2',
      python_callable = prepare_message_2,
-     provide_context = True,
+    
      dag = dag
 )
 

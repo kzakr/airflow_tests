@@ -1,0 +1,13 @@
+[project]
+name = "airflow-tests"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "apache-airflow-providers-postgres>=7.0.0",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "pathlib>=1.0.1",
+    "scikit-learn>=1.9.0",
+]

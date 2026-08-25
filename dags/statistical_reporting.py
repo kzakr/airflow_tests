@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.postgres_operator import PostgresOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 from py_files.commons import get_time
 
@@ -14,7 +14,6 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 3, 17),
-    'schedule_interval' : 'None',
     'email_on_failure': False,
     'email_on_success': True,
     'email_on_retry': False,
@@ -52,14 +51,14 @@ dag = DAG(
     start_date= datetime(2025, 3, 17),
     default_args = default_args,
     description = 'description of your dag_2',
-    schedule_interval = None, #you can set any schedule interval you want.
+    schedule = None, #you can set any schedule interval you want.
     catchup = False,
 )
 
 
-create_tables = PostgresOperator(
+create_tables = SQLExecuteQueryOperator(
         task_id='create_view_with_increasing_values',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/create_statistical_tables.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
@@ -68,29 +67,29 @@ create_tables = PostgresOperator(
 prepare_increasing_view = PythonOperator(
      task_id = 'prepare_view_increasing',
      python_callable = _prepare_increasing_view,
-     provide_context = True,
+    
      dag = dag
 )
 
 prepare_decreasing_view = PythonOperator(
      task_id = 'prepare_view_decreasing',
      python_callable = _prepare_decreasing_view,
-     provide_context = True,
+    
      dag = dag
 )
 
 
-create_view_with_increasing_values_task = PostgresOperator(
+create_view_with_increasing_values_task = SQLExecuteQueryOperator(
         task_id='insert_values_inc',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_tickers_increasing.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),
     )
 
-create_view_with_decreasing_values_task = PostgresOperator(
+create_view_with_decreasing_values_task = SQLExecuteQueryOperator(
         task_id='insert_values_dec',
-        postgres_conn_id="airflow",
+        conn_id="airflow",
         sql='./sql_scipts/sql_query_tickers_decreasing.sql',
         retries=3,
         retry_delay=timedelta(minutes=3),

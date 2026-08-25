@@ -75,7 +75,7 @@ def get_changing_pattern(source:str, lags:int, lagged_column:str, sign: str = ">
     if lags<1:
         print("Cannot be less than 1 lag")
     try:
-        lagged_column.remove("full_date")
+        lagged_column.remove("_date")
     except Exception as ex:
         print(ex)
     sql_query = "select ticker as ticker, _date as _date, "
@@ -169,7 +169,7 @@ def get_results(table_1:str, table_2:str)-> str:
     result_query += "\n)"
     result_query += f"\nselect {table_1}.*, {table_2}.* \nfrom {table_1} JOIN {table_2}"
     result_query += f"\nON {table_1}.ticker={table_2}.ticker AND"
-    result_query += f"\n({table_1}.full_date = {table_2}.days_back OR {table_1}.days_back={table_2}.full_date)"
+    result_query += f"\n({table_1}._date = {table_2}.days_back OR {table_1}.days_back={table_2}._date)"
     result_query += f"\nwhere current_date_ in (select MAX(current_date_) FROM {table_1})"
 
     return result_query

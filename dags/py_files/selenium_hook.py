@@ -1,5 +1,5 @@
 
-from airflow.hooks.base_hook import BaseHook
+from airflow.hooks.base import BaseHook
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options

@@ -38,7 +38,19 @@ def quarter_back(date_as_int:int):
 
 def add_working_days(num_days:int, date_as_int:int= None, format:str = "%Y%m%d"):
     if date_as_int:
-        start_date = datetime.strptime(str(date_as_int), '%Y%m%d')
+        date_str = str(date_as_int)
+        date_formats = ["%Y%m%d", "%Y-%m-%d"]
+        start_date = None
+        for input_format in date_formats:
+            try:
+                start_date = datetime.strptime(date_str, input_format)
+                break
+            except ValueError:
+                continue
+        if start_date is None:
+            raise ValueError(
+                f"date_as_int '{date_as_int}' does not match supported formats %Y%m%d or %Y-%m-%d"
+            )
     else: 
         start_date = datetime.now()
     my_num_days = abs(num_days)
