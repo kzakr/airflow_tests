@@ -10,4 +10,5 @@ latest
 *.env
 postgres_bulk.py
 logs\*
-logs/*
+.venv/
+.venv\

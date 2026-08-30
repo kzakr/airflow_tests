@@ -2,10 +2,10 @@ drop view if exists ml_temp_validate_yahoo ;
 create view ml_temp_validate_yahoo as select * from (with a as ( 
 	 select sql_query.*, statistical_metrics_avg.avg_volume, statistical_metrics_avg.avg_close, statistical_metrics_avg._date_count, statistical_metrics_std.std_close, statistical_metrics_std.std_volume from ((select ticker, _date, close as close,  volume as volume  from yahoo_result 
 where  
- _date in (select distinct _date from yahoo_result where _date not in (select distinct _date from yahoo_result where _date > '2026-08-24') order by _date desc limit 55)  
+ _date in (select distinct _date from yahoo_result where _date not in (select distinct _date from yahoo_result where _date > '2026-08-29') order by _date desc limit 55)  
 ) sql_query join 
 (select ticker,  avg(volume) as avg_volume, avg(close) as avg_close,count(*) as _date_count  from yahoo_result  
-where _date> '2026-05-04' and _date < '2026-08-10'
+where _date> '2026-05-11' and _date < '2026-08-17'
 group by ticker 
 having avg(volume)<>0 and avg(close)<>0 
 ) statistical_metrics_avg 
@@ -15,8 +15,8 @@ where _date> '2025-12-24' and _date < '2026-04-01'
 group by ticker 
 having avg(volume)<>0 and avg(close)<>0 
 ) avg
-	 on fr.ticker = avg.ticker where fr._date > '2026-05-04' and fr._date < '2026-08-10')
-where _date> '2026-05-04' and _date < '2026-08-10'
+	 on fr.ticker = avg.ticker where fr._date > '2026-05-11' and fr._date < '2026-08-17')
+where _date> '2026-05-11' and _date < '2026-08-17'
 group by ticker) statistical_metrics_std 
 on sql_query.ticker = statistical_metrics_std.ticker) where statistical_metrics_avg.avg_volume <>0 and statistical_metrics_avg.avg_close <>0)
 , b as ( select *, 

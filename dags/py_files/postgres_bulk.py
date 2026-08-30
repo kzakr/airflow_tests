@@ -30,7 +30,7 @@ def get_postgres_url() -> str:
     Inside Docker Compose, POSTGRES_HOST should resolve to the service name `postgres`.
     When running directly on the host, `localhost` or `host.docker.internal` is typical.
     """
-    host = os.getenv("POSTGRES_HOST", "localhost")
+    host = os.getenv("POSTGRES_HOST", "postgres")
     dbname = os.getenv("POSTGRES_DB", "airflow")
     user = os.getenv("POSTGRES_USER", "airflow")
     password = os.getenv("POSTGRES_PASSWORD", "airflow")
